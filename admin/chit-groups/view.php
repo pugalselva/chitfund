@@ -55,9 +55,11 @@ $progress = $total > 0 ? round(($completed / $total) * 100) : 0;
             </div>
 
             <div class="content">
+                 <a href="../auctions/index.php?group_id=<?= $group['id'] ?>">
+    View Auctions
+</a>
 
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
-
                     <!-- GROUP INFO -->
                     <div class="info-box">
                         <h4>Group Information</h4><br>

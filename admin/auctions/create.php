@@ -1,3 +1,17 @@
+
+<?php
+
+include '../../config/database.php';
+$groupId = (int)$_GET['group_id'];
+
+$nextMonth = $conn->query("
+    SELECT IFNULL(MAX(auction_month),0)+1 AS next_month
+    FROM auctions
+    WHERE chit_group_id = $groupId
+")->fetch_assoc()['next_month'];
+
+?>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -22,9 +36,9 @@
 
 <div class="form-box" style="max-width:600px;">
 
-<h4>Auction Details</h4><br>
+<!-- <h4>Auction Details</h4><br> -->
 
-<form method="post">
+<!-- <form method="post">
 
 <div class="form-group">
     <label>Chit Group *</label>
@@ -75,7 +89,24 @@
     <button type="button" class="btn-secondary">Cancel</button>
 </a>
 
+</form> -->
+<h4>Create Auction – Month <?= $nextMonth ?></h4>
+
+<form method="post" action="store.php">
+
+<input type="hidden" name="group_id" value="<?= $groupId ?>">
+<input type="hidden" name="auction_month" value="<?= $nextMonth ?>">
+
+<label>Auction Date & Time</label>
+<input type="datetime-local" name="auction_datetime" required>
+
+<label>Starting Bid Amount</label>
+<input type="number" name="starting_bid" required>
+
+<button>Create Auction</button>
+
 </form>
+
 
 </div>
 

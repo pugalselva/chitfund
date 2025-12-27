@@ -2,17 +2,21 @@
 session_start();
 include '../../config/database.php';
 
-if ($_SESSION['role'] !== 'admin') {
-    echo "Unauthorized";
-    exit;
-}
+if ($_SESSION['role'] !== 'admin') exit("Unauthorized");
 
 $groupId = (int)$_POST['group_id'];
 $members = $_POST['members'] ?? [];
 
-if (empty($members)) {
-    echo "No members selected";
-    exit;
+/* Get group limit */
+$g = $conn->query("SELECT total_members FROM chit_groups WHERE id=$groupId")->fetch_assoc();
+$limit = $g['total_members'];
+
+$current = $conn->query("
+    SELECT COUNT(*) c FROM chit_group_members WHERE group_id=$groupId
+")->fetch_assoc()['c'];
+
+if ($current + count($members) > $limit) {
+    exit("Member limit exceeded");
 }
 
 $stmt = $conn->prepare("
@@ -20,10 +24,9 @@ $stmt = $conn->prepare("
     VALUES (?, ?)
 ");
 
-foreach ($members as $memberId) {
-    $stmt->bind_param("is", $groupId, $memberId);
+foreach ($members as $mid) {
+    $stmt->bind_param("is", $groupId, $mid);
     $stmt->execute();
 }
 
 echo "success";
-?>
