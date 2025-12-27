@@ -1,8 +1,18 @@
+<?php
+session_start();
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'member') {
+    header('Location: ../index.php');
+    exit();
+}
+?>
+
+
 <!DOCTYPE html>
 <html>
 
 <head>
     <title>Member Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="../assets/css/style.css">
 </head>
 
@@ -16,13 +26,18 @@
 
             <div class="topbar">
                 <div>
-                    <div class="page-title">Dashboard</div>
+                    <div class="page-title">Member Dashboard</div>
                     <div class="page-subtitle">Welcome back! Here's your overview.</div>
                 </div>
+                <div class="topbar">
+                    <div>
+                        <b>Member User</b><br>
+                        sandy@gmail.com
+                        <a href="../logout.php" class="btn btn-danger">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </a>
+                    </div>
 
-                <div style="text-align:right;">
-                    <b>Member User</b><br>
-                    sandy@gmail.com
                 </div>
             </div>
 

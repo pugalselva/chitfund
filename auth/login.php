@@ -2,28 +2,30 @@
 session_start();
 include '../config/database.php';
 
-$email = $_POST['email'];
+$loginId = $_POST['login_id'];
 $password = $_POST['password'];
 $role = $_POST['role'];
 
-$q = $conn->query("
-    SELECT * FROM users 
-    WHERE email='$email' 
-    AND password=MD5('$password')
-    AND role='$role'
+$stmt = $conn->prepare("
+    SELECT * FROM users
+    WHERE user_id=? AND role=? AND is_active=1
 ");
+$stmt->bind_param("ss", $loginId, $role);
+$stmt->execute();
 
-if($q->num_rows){
-    $u = $q->fetch_assoc();
-    $_SESSION['user_id'] = $u['id'];
-    $_SESSION['role'] = $u['role'];
+$result = $stmt->get_result();
 
-    if($role === 'admin'){
-        header("Location: ../admin/dashboard.php");
-    }else{
-        header("Location: ../member/dashboard.php");
+if ($result->num_rows === 1) {
+    $user = $result->fetch_assoc();
+
+    if (password_verify($password, $user['password'])) {
+        $_SESSION['user_id'] = $user['id'];
+        $_SESSION['role'] = $user['role'];
+        echo "success";
+    } else {
+        echo "wrong_password";
     }
-}else{
-    echo "Invalid login";
+} else {
+    echo "not_found";
 }
 ?>

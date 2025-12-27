@@ -40,4 +40,8 @@ $base = "/statice_design_chitfund/admin/";
        class="<?= $currentPage=='index.php' && strpos($_SERVER['REQUEST_URI'],'settings')?'active':'' ?>">
         ⚙ Settings
     </a>
+   <!-- <a href="<?= $base ?>logout.php"
+   class="<?= strpos($_SERVER['REQUEST_URI'], 'logout') ? 'active' : '' ?>">
+   🚪 Logout
+</a> -->
 </div>

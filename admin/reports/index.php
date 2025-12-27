@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Reports</title>
+    <title>Reports</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <link rel="stylesheet" href="../../assets/css/style.css">
 </head>
 <body>
@@ -16,6 +17,16 @@
         <div class="page-title">Reports</div>
         <div class="page-subtitle">Generate and download comprehensive reports</div>
     </div>
+    <div class="topbar">
+                <div>
+                    <b>Admin User</b><br>
+                    sandy@gmail.com
+                    <a href="../../logout.php" class="btn btn-danger">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </a>
+                </div>
+
+            </div>
 </div>
 
 <div class="content">

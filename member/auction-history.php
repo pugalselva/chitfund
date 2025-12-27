@@ -20,7 +20,6 @@
                         View past auction results and your share of discounts
                     </div>
                 </div>
-
                 <div style="text-align:right;">
                     <b>Member User</b><br>
                     sandy@gmail.com

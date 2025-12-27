@@ -2,6 +2,7 @@
 <html>
 <head>
 <title>Live Auction</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <link rel="stylesheet" href="../assets/css/style.css">
 </head>
 <body>
@@ -17,10 +18,16 @@
         <div class="page-subtitle">Place your bid now</div>
     </div>
 
-    <div style="text-align:right;">
-        <b>Member User</b><br>
-        sandy@gmail.com
-    </div>
+    <div class="topbar">
+                <div>
+                    <b>Member User</b><br>
+                    sandy@gmail.com
+                    <a href="../logout.php" class="btn btn-danger">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </a>
+                </div>
+
+            </div>
 </div>
 
 <div class="content">
