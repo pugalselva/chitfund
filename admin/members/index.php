@@ -7,9 +7,7 @@
 
     <link rel="stylesheet" href="../../assets/css/style.css">
 </head>
-
 <body>
-
     <div class="wrapper">
         <?php include '../layout/sidebar.php'; ?>
 
