@@ -23,3 +23,4 @@ if ($res->num_rows === 1) {
         echo "success";
     } else echo "wrong_password";
 } else echo "not_found";
+?>
