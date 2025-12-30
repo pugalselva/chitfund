@@ -1,3 +1,16 @@
+<?php
+session_start();
+include '../../config/database.php';
+
+if ($_SESSION['role'] !== 'admin') {
+    header("Location: ../../index.php");
+    exit;
+}
+
+$settings = $conn->query("SELECT * FROM settings ORDER BY id ASC");
+?>
+
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -36,91 +49,45 @@
 
     <table class="settings-table">
         <thead>
-            <tr>
-                <th>Setting</th>
-                <th>Value</th>
-                <th>Description</th>
-                <th>Status</th>
-                <th>Actions</th>
-            </tr>
+             <tr>
+            <th>Setting</th>
+            <th>Value</th>
+            <th>Description</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
         </thead>
 
         <tbody>
-            <tr>
-                <td><b>default_foreman_commission</b></td>
-                <td>
-                    <input class="setting-input" value="5">
-                </td>
-                <td>Default foreman commission percentage</td>
-                <td>
-                    <label class="switch">
-                        <input type="checkbox" checked>
-                        <span class="slider"></span>
-                    </label>
-                </td>
-                <td>
-                    <button class="save-btn" onclick="saveSetting('default_foreman_commission')">
-                        Save
-                    </button>
-                </td>
-            </tr>
+            <?php while ($s = $settings->fetch_assoc()): ?>
+        <tr>
+            <form method="post" action="update.php">
+                <td><b><?= $s['setting_key'] ?></b></td>
 
-            <tr>
-                <td><b>payment_grace_period</b></td>
                 <td>
-                    <input class="setting-input" value="5">
+                    <input type="text"
+                           name="setting_value"
+                           class="form-control"
+                           value="<?= $s['setting_value'] ?>">
                 </td>
-                <td>Payment grace period in days</td>
-                <td>
-                    <label class="switch">
-                        <input type="checkbox" checked>
-                        <span class="slider"></span>
-                    </label>
-                </td>
-                <td>
-                    <button class="save-btn" onclick="saveSetting('payment_grace_period')">
-                        Save
-                    </button>
-                </td>
-            </tr>
 
-            <tr>
-                <td><b>minimum_bid_difference</b></td>
-                <td>
-                    <input class="setting-input" value="1000">
-                </td>
-                <td>Minimum bid difference amount</td>
-                <td>
-                    <label class="switch">
-                        <input type="checkbox" checked>
-                        <span class="slider"></span>
-                    </label>
-                </td>
-                <td>
-                    <button class="save-btn" onclick="saveSetting('minimum_bid_difference')">
-                        Save
-                    </button>
-                </td>
-            </tr>
+                <td><?= $s['description'] ?></td>
 
-            <tr>
-                <td><b>auto_auction_reminder</b></td>
-                <td>
-                    <input class="setting-input" value="true">
-                </td>
-                <td>Send automatic auction reminders</td>
                 <td>
                     <label class="switch">
-                        <input type="checkbox" checked>
+                        <input type="checkbox" name="is_active"
+                               <?= $s['is_active'] ? 'checked' : '' ?>>
                         <span class="slider"></span>
                     </label>
                 </td>
+
                 <td>
-                    <button class="save-btn" onclick="saveSetting('auto_auction_reminder')">
-                        Save
-                    </button>
+                    <input type="hidden" name="id" value="<?= $s['id'] ?>">
+                    <button class="btn-primary">Save</button>
                 </td>
-            </tr>
+            </form>
+        </tr>
+        <?php endwhile; ?>
         </tbody>
     </table>
 </div>

@@ -36,6 +36,7 @@ $progress = $total > 0 ? round(($completed / $total) * 100) : 0;
 
 <head>
     <title>Chit Group Details</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../../assets/css/style.css">
 </head>
 
@@ -55,9 +56,11 @@ $progress = $total > 0 ? round(($completed / $total) * 100) : 0;
             </div>
 
             <div class="content">
-                 <a href="../auctions/index.php?group_id=<?= $group['id'] ?>">
-    View Auctions
+                 <a href="../auctions/index.php?group_id=<?= $group['id'] ?>"
+   class="btn btn-primary mb-3">
+   <i class="fa fa-gavel me-1"></i> View Auctions
 </a>
+
 
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
                     <!-- GROUP INFO -->

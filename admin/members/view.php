@@ -1,117 +1,181 @@
+<?php
+session_start();
+include '../../config/database.php';
+
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+    header('Location: ../../index.php');
+    exit();
+}
+
+if (!isset($_GET['id'])) {
+    die('Member ID missing');
+}
+
+$member_id = $_GET['id'];
+
+/* ================= MEMBER + BANK ================= */
+$stmt = $conn->prepare("
+    SELECT 
+        m.*,
+        b.account_name,
+        b.account_no,
+        b.bank_name,
+        b.ifsc,
+        b.upi_id,
+        b.cheque_photo
+    FROM members m
+    LEFT JOIN member_bank_details b 
+        ON b.member_id = m.member_id
+    WHERE m.member_id = ?
+");
+
+if (!$stmt) {
+    die("SQL Prepare Failed: " . $conn->error);
+}
+
+$stmt->bind_param("s", $member_id);
+$stmt->execute();
+$result = $stmt->get_result();
+$m = $result->fetch_assoc();
+
+
+/* ================= AGE ================= */
+$dob = new DateTime($m['dob']);
+$today = new DateTime();
+$age = $today->diff($dob)->y;
+
+/* ================= ACTIVITY ================= */
+
+// Active groups
+// $gStmt = $conn->prepare("
+//     SELECT COUNT(*) total 
+//     FROM group_members 
+//     WHERE member_id = ? AND is_active = 1
+// ");
+// $gStmt->bind_param("s", $member_id);
+// $gStmt->execute();
+// $groups = $gStmt->get_result()->fetch_assoc()['total'] ?? 0;
+
+// // Total payments
+// $pStmt = $conn->prepare("
+//     SELECT IFNULL(SUM(amount),0) total 
+//     FROM payments 
+//     WHERE member_id = ?
+// ");
+// $pStmt->bind_param("s", $member_id);
+// $pStmt->execute();
+// $totalAmount = $pStmt->get_result()->fetch_assoc()['total'] ?? 0;
+?>
+
 <!DOCTYPE html>
 <html>
-
 <head>
     <title>Member Profile</title>
     <link rel="stylesheet" href="../../assets/css/style.css">
 </head>
 
 <body>
+<div class="wrapper">
+<?php include '../layout/sidebar.php'; ?>
 
-    <div class="wrapper">
-        <?php include '../layout/sidebar.php'; ?>
+<div class="main">
+<div class="topbar">
+    <div>
+        <h2><?= htmlspecialchars($m['full_name']) ?></h2>
+        <small>Member ID: <?= htmlspecialchars($m['member_id']) ?></small>
+    </div>
+</div>
 
-        <div class="main">
-            <div class="topbar">
-                <div>
-                    <h2>John Doe</h2>
-                    <small>Member ID: M001</small>
-                </div>
+<div class="content">
 
-            </div>
+<div class="tabs">
+    <a href="#" id="tabPersonal" class="active" onclick="showTab('personal')">👤 Personal</a>
+    <a href="#" id="tabBank" onclick="showTab('bank')">🏦 Bank</a>
+    <a href="#" id="tabActivity" onclick="showTab('activity')">📊 Activity</a>
+</div>
 
-            <div class="content">
+<!-- PERSONAL -->
+<div id="personal" class="tab-content profile-box">
+<h4>Personal Information</h4><br>
+<div class="info-grid">
+    <div>
+        <b>Name</b><br><?= htmlspecialchars($m['full_name']) ?><br><br>
+        <b>DOB</b><br><?= date('d/m/Y', strtotime($m['dob'])) ?><br><br>
+        <b>Address</b><br><?= nl2br(htmlspecialchars($m['address'])) ?>
+    </div>
+    <div>
+        <b>Gender</b><br><?= htmlspecialchars($m['gender']) ?><br><br>
+        <b>Age</b><br><?= $age ?> years<br><br>
+        <b>Mobile</b><br><?= htmlspecialchars($m['mobile']) ?>
+    </div>
+</div>
+</div>
 
-                <div class="tabs">
-                    <a href="javascript:void(0)" id="tabPersonal" class="active" onclick="showTab('personal')">👤 Personal
-                        Details</a>
+<!-- BANK -->
+<div id="bank" class="tab-content profile-box" style="display:none;">
+<h4>Bank Details</h4><br>
 
-                    <a href="javascript:void(0)" id="tabBank" onclick="showTab('bank')">🏦 Bank Details</a>
+<?php if (!empty($m['account_no'])): ?>
+<div class="info-grid">
+    <div>
+        <b>Account Holder</b><br><?= htmlspecialchars($m['account_name']) ?><br><br>
+        <b>Account No</b><br><?= htmlspecialchars($m['account_no']) ?><br><br>
+        <b>Bank</b><br><?= htmlspecialchars($m['bank_name']) ?>
+    </div>
+    <div>
+        <b>IFSC</b><br><?= htmlspecialchars($m['ifsc']) ?><br><br>
+        <b>UPI</b><br><?= htmlspecialchars($m['upi_id'] ?: '-') ?>
+    </div>
+</div>
+<?php else: ?>
+<p style="color:#888;">No bank details available</p>
+<?php endif; ?>
+</div>
 
-                    <a href="javascript:void(0)" id="tabActivity" onclick="showTab('activity')">📊 Activity</a>
-                </div>
+<!-- ACTIVITY -->
+<!-- <div id="activity" class="tab-content profile-box" style="display:none;">
+<h4>Member Activity</h4><br>
 
-
-                <div id="personal" class="tab-content active profile-box">
-
-                    <h4>Personal Information</h4><br>
-
-                    <div class="info-grid">
-                        <div>
-                            <b>Full Name</b><br>John Doe<br><br>
-                            <b>Date of Birth</b><br>15/06/1985<br><br>
-                            <b>Address</b><br>Chennai, Tamil Nadu
-                        </div>
-
-                        <div>
-                            <b>Gender</b><br>Male<br><br>
-                            <b>Age</b><br>40 years<br><br>
-                            <b>Mobile</b><br>+91 98765 43210
-                        </div>
-                    </div>
-                </div>
-                <div id="bank" class="tab-content profile-box" style="display:none;">
-                    <h4>Bank Account Details</h4><br>
-                    <!-- your bank details HTML here -->
-                </div>
-
-
-                <br>
-
-                <div id="activity" class="tab-content profile-box" style="display:none;">
-                    <h4>Member Activity</h4><br>
-
-                    <div class="info-grid">
-                        <div class="stat-card stat-blue">
-                            <h2>2</h2>
-                            <small>Active Groups</small>
-                        </div>
-
-                        <div class="stat-card stat-green">
-                            <h2>₹2.4L</h2>
-                            <small>Total Contributions</small>
-                        </div>
-
-                        <div class="stat-card stat-purple">
-                            <h2>24</h2>
-                            <small>Member Since (months)</small>
-                        </div>
-                    </div>
-                </div>
-                <span class="badge active">Active</span>
-            </div>
-        </div>
+<div class="info-grid">
+    <div class="stat-card stat-blue">
+        <h2><?= $groups ?></h2>
+        <small>Active Groups</small>
     </div>
 
-    <!-- script -->
-    <script>
-        function showTab(tab) {
-            // hide all contents
-            document.getElementById('personal').style.display = 'none';
-            document.getElementById('bank').style.display = 'none';
-            document.getElementById('activity').style.display = 'none';
+    <div class="stat-card stat-green">
+        <h2>₹<?= number_format($totalAmount) ?></h2>
+        <small>Total Contributions</small>
+    </div>
 
-            // remove active from tabs
-            document.getElementById('tabPersonal').classList.remove('active');
-            document.getElementById('tabBank').classList.remove('active');
-            document.getElementById('tabActivity').classList.remove('active');
+    <div class="stat-card stat-purple">
+        <h2><?= (int)((time() - strtotime($m['joining_date'])) / (30*24*60*60)) ?></h2>
+        <small>Member Since (Months)</small>
+    </div>
+</div>
+</div> -->
 
-            // show selected
-            document.getElementById(tab).style.display = 'block';
+<br>
+<span class="badge <?= $m['is_active'] ? 'active' : 'inactive' ?>">
+<?= $m['is_active'] ? 'Active' : 'Inactive' ?>
+</span>
 
-            if (tab === 'personal') {
-                document.getElementById('tabPersonal').classList.add('active');
-            }
-            if (tab === 'bank') {
-                document.getElementById('tabBank').classList.add('active');
-            }
-            if (tab === 'activity') {
-                document.getElementById('tabActivity').classList.add('active');
-            }
-        }
-    </script>
+</div>
+</div>
+</div>
 
+<script>
+function showTab(tab) {
+    ['personal','bank','activity'].forEach(t => {
+        document.getElementById(t).style.display = 'none';
+        document.getElementById('tab'+t.charAt(0).toUpperCase()+t.slice(1))
+            .classList.remove('active');
+    });
+
+    document.getElementById(tab).style.display = 'block';
+    document.getElementById('tab'+tab.charAt(0).toUpperCase()+tab.slice(1))
+        .classList.add('active');
+}
+</script>
 
 </body>
-
 </html>

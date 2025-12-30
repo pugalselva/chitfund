@@ -1,8 +1,14 @@
 
 <?php
 
-include '../../config/database.php';
-$groupId = (int)$_GET['group_id'];
+// include '../../config/database.php';
+// $groupId = (int)$_GET['group_id'];
+session_start();
+require_once '../../config/database.php';
+
+$groupId = $_GET['group_id'] ?? null;
+if (!$groupId) die("Group ID missing");
+$groupId = (int)$groupId;
 
 $nextMonth = $conn->query("
     SELECT IFNULL(MAX(auction_month),0)+1 AS next_month
@@ -29,6 +35,11 @@ $nextMonth = $conn->query("
     <div>
         <div class="page-title">Create Auction</div>
         <div class="page-subtitle">Schedule a new auction for chit group</div>
+        <form method="post" action="store.php">
+    <input type="hidden" name="group_id" value="<?= $groupId ?>">
+    <input type="hidden" name="auction_month" value="<?= $nextMonth ?>">
+
+</form>
     </div>
 </div>
 

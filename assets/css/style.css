@@ -510,6 +510,9 @@ input:checked + .slider:before{
     background:#f3f4f6;
 }
 
+/* button design */
+
+
 /* Toggle Switch */
 .switch{
     position:relative;

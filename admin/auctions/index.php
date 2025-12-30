@@ -6,16 +6,32 @@ if ($_SESSION['role'] !== 'admin') {
     die('Unauthorized');
 }
 
-$groupId = (int) ($_GET['group_id'] ?? 0);
+// $groupId = (int) ($_GET['group_id'] ?? 0);
+// if (!$groupId) {
+//     die('Group ID missing');
+// }
+$groupId = $_GET['group_id'] ?? null;
 if (!$groupId) {
-    die('Group ID missing');
+    die("Group ID missing");
 }
+$groupId = (int)$groupId;
 
-$auctions = $conn->query("
+
+// $au  
+
+$stmt = $conn->prepare("
     SELECT * FROM auctions
-    WHERE chit_group_id = $groupId
+    WHERE chit_group_id = ?
     ORDER BY auction_month ASC
 ");
+$stmt->bind_param("i", $groupId);
+$stmt->execute();
+$auctions = $stmt->get_result();
+// if (!$groupId) {
+//     header("Location: ../groups/index.php");
+//     exit;
+// }
+
 ?>
 
 

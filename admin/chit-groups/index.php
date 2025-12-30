@@ -18,7 +18,56 @@ $count = $result->num_rows;
 <head>
     <title>Chit Groups</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
     <link rel="stylesheet" href="../../assets/css/style.css">
+    <style>
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            text-decoration: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #fff;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: 0.2s ease;
+        }
+
+        /* Edit */
+        .btn-edit {
+            background-color: #f39c12;
+        }
+
+        .btn-edit:hover {
+            background-color: #d68910;
+        }
+
+        /* View */
+        .btn-view {
+            background-color: #3498db;
+        }
+
+        .btn-view:hover {
+            background-color: #2980b9;
+        }
+
+        /* Auctions */
+        .btn-auction {
+            background-color: #27ae60;
+        }
+
+        .btn-auction:hover {
+            background-color: #1e8449;
+        }
+    </style>
 </head>
 
 <body>
@@ -52,9 +101,9 @@ $count = $result->num_rows;
                 <a href="create.php">
                     <button class="btn-primary">＋ Create Group</button>
                 </a>
-<a href="../auctions/index.php?group_id=<?= $g['id'] ?>">
-    Auctions
-</a>
+                <!-- <a href="../auctions/index.php?group_id=<?= $g['id'] ?>">
+                    Auctions
+                </a> -->
 
                 <div class="table-box">
                     <h3>All Groups (<?= $count ?>)</h3>
@@ -99,29 +148,29 @@ $count = $result->num_rows;
                                         <?= ucfirst($g['status']) ?>
                                     </span>
                                 </td>
-                                <td>
-                                    <a href="assign-members.php?group_id=<?= $g['id'] ?>">
-                                        Assign Members
-                                    </a><br>
-                                    <a href="edit.php?id=<?= $g['id'] ?>">Edit</a><br>
-                                    <a href="view.php?id=<?= $g['id'] ?>">👁 View</a>
-                                    <a href="../auctions/index.php?group_id=<?= $g['id'] ?>">
-    Auctions
-</a>
+                                <td class="action-buttons">
+                                    <!-- <a href="edit.php?id=<?= $g['id'] ?>" >
+                                        <i class="fa fa-pen"></i> Edit
+                                    </a> -->
+                                <a href="edit.php?id=<?= $g['id'] ?>" class="btn btn-edit">  <i class="fa fa-pen"></i>Edit</a>
 
+                                    <a href="view.php?id=<?= $g['id'] ?>" class="btn btn-view">
+                                        <i class="fa fa-eye"></i> View
+                                    </a>
+
+                                    <a href="../auctions/index.php?group_id=<?= $g['id'] ?>" class="btn btn-auction">
+                                        <i class="fa fa-gavel"></i> Auctions
+                                    </a>
                                 </td>
+
                             </tr>
                             <?php endwhile; ?>
-
                         </tbody>
                     </table>
-
                 </div>
-
             </div>
         </div>
     </div>
-
 </body>
 
 </html>
