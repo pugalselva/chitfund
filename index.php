@@ -157,7 +157,6 @@
                 Login as Admin
             </button>
         </form>
-
     </div>
 
     <script src="assets/js/script.js"></script>
