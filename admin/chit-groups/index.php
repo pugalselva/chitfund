@@ -7,13 +7,6 @@ if ($_SESSION['role'] !== 'admin') {
     exit();
 }
 
-// $result = $conn->query('SELECT * FROM chit_groups ORDER BY created_at DESC');
-// $result = $conn->query("
-//     SELECT * 
-//     FROM chit_groups
-//     WHERE is_active = 1
-//     ORDER BY created_at DESC
-// ");
 $result = $conn->query("
     SELECT 
         g.*,
@@ -26,7 +19,6 @@ $result = $conn->query("
     GROUP BY g.id
     ORDER BY g.created_at DESC
 ");
-
 
 $count = $result->num_rows;
 ?>
@@ -146,7 +138,7 @@ $count = $result->num_rows;
                                 <th>Members</th>
                                 <th>Contribution</th>
                                 <th>Duration</th>
-                                <th>Progress</th>
+                                <th>Current Month Progress</th>
                                 <th>Auction Type</th>
                                 <th>Status</th>
                                 <th>Action</th>
@@ -154,9 +146,27 @@ $count = $result->num_rows;
                         </thead>
                         <tbody>
 
-                            <?php while($g = $result->fetch_assoc()): 
-                                $percent = round(($g['completed_months'] / $g['duration_months']) * 100);
+                            <?php while ($g = $result->fetch_assoc()): ?>
+
+                            <?php
+                            /* ---------- AUTO COMPLETE GROUP ---------- */
+                            if ($g['completed_months'] >= $g['duration_months'] && $g['status'] !== 'completed') {
+                                $update = $conn->prepare("
+                                    UPDATE chit_groups
+                                    SET status='completed'
+                                    WHERE id=?
+                                ");
+                                $update->bind_param('i', $g['id']);
+                                $update->execute();
+                            
+                                // Update local variable so UI shows correct status
+                                $g['status'] = 'completed';
+                            }
+                            
+                            /* ---------- PROGRESS ---------- */
+                            $percent = $g['duration_months'] > 0 ? round(($g['completed_months'] / $g['duration_months']) * 100) : 0;
                             ?>
+
                             <tr>
                                 <td><?= $g['group_code'] ?></td>
                                 <td>
@@ -170,8 +180,8 @@ $count = $result->num_rows;
                                 <td>
                                     <?= $g['completed_months'] ?> / <?= $g['duration_months'] ?><br>
                                     <small><?= $percent ?>%</small>
-                                    
                                 </td>
+
                                 <td><?= $g['auction_type'] ?></td>
                                 <td>
                                     <span class="badge <?= $g['status'] ?>">
@@ -185,17 +195,17 @@ $count = $result->num_rows;
                                     <!-- <a href="edit.php?id=<?= $g['id'] ?>" class="btn btn-edit">  <i class="fa fa-pen"></i>Edit</a> -->
                                     <?php if ($g['status'] !== 'completed'): ?>
                                     <a href="edit.php?id=<?= $g['id'] ?>" class="btn btn-edit">
-                                        <i class="fa fa-pen"></i> 
+                                        <i class="fa fa-pen"></i>
                                     </a>
                                     <a href="javascript:void(0)" class="btn btn-danger"
                                         onclick="confirmDelete(<?= (int) $g['id'] ?>)">
-                                        <i class="fa fa-trash"></i> 
+                                        <i class="fa fa-trash"></i>
                                     </a>
 
                                     <?php endif; ?>
 
                                     <a href="view.php?id=<?= $g['id'] ?>" class="btn btn-view">
-                                        <i class="fa fa-eye"></i> 
+                                        <i class="fa fa-eye"></i>
                                     </a>
 
                                     <!-- <a href="../auctions/index.php?group_id=<?= $g['id'] ?>" class="btn btn-auction">
@@ -211,34 +221,36 @@ $count = $result->num_rows;
         </div>
     </div>
     <script>
-function confirmDelete(groupId) {
-    if (!groupId) {
-        alert('Invalid group ID');
-        return;
-    }
+        function confirmDelete(groupId) {
+            if (!groupId) {
+                alert('Invalid group ID');
+                return;
+            }
 
-    if (!confirm("Are you sure you want to delete this group?")) {
-        return;
-    }
+            if (!confirm("Are you sure you want to delete this group?")) {
+                return;
+            }
 
-    fetch('delete.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        body: new URLSearchParams({ id: groupId })
-    })
-    .then(res => res.text())
-    .then(result => {
-        if (result === 'success') {
-            alert('Group deleted successfully');
-            location.reload();
-        } else {
-            alert(result);
+            fetch('delete.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: new URLSearchParams({
+                        id: groupId
+                    })
+                })
+                .then(res => res.text())
+                .then(result => {
+                    if (result === 'success') {
+                        alert('Group deleted successfully');
+                        location.reload();
+                    } else {
+                        alert(result);
+                    }
+                });
         }
-    });
-}
-</script>
+    </script>
 
 
 </body>

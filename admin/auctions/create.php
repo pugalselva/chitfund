@@ -67,8 +67,15 @@ $groups = $conn->query("
                         <!-- STARTING BID -->
                         <div class="form-group">
                             <label>Starting Bid Amount *</label>
-                            <input type="number" name="starting_bid_amount" class="form-control" required>
+
+                            <small id="lastBidInfo" style="display:block;color:#6b7280;margin-bottom:6px;">
+                                Last month bid: —
+                            </small>
+
+                            <input type="number" name="starting_bid_amount" id="startingBidInput" class="form-control"
+                                required>
                         </div>
+
 
                         <!-- STATUS -->
                         <div class="form-group">
@@ -86,6 +93,33 @@ $groups = $conn->query("
             </div>
         </div>
     </div>
+
+    <!-- script -->
+    <script>
+        const groupSelect = document.querySelector('[name="chit_group_id"]');
+        const lastBidInfo = document.getElementById('lastBidInfo');
+        const startingBidInput = document.getElementById('startingBidInput');
+
+        groupSelect.addEventListener('change', function() {
+            const groupId = this.value;
+
+            lastBidInfo.textContent = 'Last month bid: —';
+            startingBidInput.value = '';
+
+            if (!groupId) return;
+
+            fetch('get-last-bid.php?group_id=' + groupId)
+                .then(res => res.text())
+                .then(amount => {
+                    if (amount) {
+                        lastBidInfo.textContent = 'Last month bid: ₹' + amount;
+                        startingBidInput.value = amount; // auto-fill (optional)
+                    } else {
+                        lastBidInfo.textContent = 'Last month bid: Not available';
+                    }
+                });
+        });
+    </script>
 
 </body>
 

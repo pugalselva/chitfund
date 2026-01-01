@@ -44,3 +44,4 @@ if ($group['status'] === 'completed') {
 
 header("Location: index.php?success=1");
 exit;
+

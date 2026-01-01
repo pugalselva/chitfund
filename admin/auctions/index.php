@@ -68,7 +68,16 @@ $auctions = $conn->query("
                             <td><?= $a['auction_month'] ?></td>
                             <td><?= date('d-m-Y H:i', strtotime($a['auction_datetime'])) ?></td>
                             <td>₹<?= number_format($a['starting_bid_amount']) ?></td>
-                            <td><?= ucfirst($a['status']) ?></td>
+                            <!-- <td><?= ucfirst($a['status']) ?></td> -->
+                            <td>
+                                <?= ucfirst($a['status']) ?>
+
+                                <?php if ($a['status'] !== 'completed'): ?>
+                                <button class="btn-danger" onclick="closeAuction(<?= (int) $a['id'] ?>)">
+                                    Close
+                                </button>
+                                <?php endif; ?>
+                            </td>
                         </tr>
                         <?php endwhile; ?>
                     </table>
@@ -76,6 +85,26 @@ $auctions = $conn->query("
             </div>
         </div>
     </div>
+    <script>
+        function closeAuction(id) {
+            if (!confirm('Mark this auction as completed?')) return;
+
+            fetch('close.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: new URLSearchParams({
+                        auction_id: id
+                    })
+                })
+                .then(r => r.text())
+                .then(res => {
+                    if (res === 'success') location.reload();
+                    else alert(res);
+                });
+        }
+    </script>
 
 </body>
 
