@@ -2,25 +2,45 @@
 session_start();
 include '../../config/database.php';
 
-if ($_SESSION['role'] !== 'admin') die("Unauthorized");
+if ($_SESSION['role'] !== 'admin') {
+    die('Unauthorized');
+}
 
-$groupId = (int)$_POST['group_id'];
-$month   = (int)$_POST['auction_month'];
-$date    = $_POST['auction_datetime'];
-$start   = (int)$_POST['starting_bid'];
+$groupId = (int)$_POST['chit_group_id'];
+$datetime = $_POST['auction_datetime'];
+$startingBid = (int)$_POST['starting_bid_amount'];
+$status = $_POST['status'];
 
-/* Determine status */
-$status = (strtotime($date) > time()) ? 'upcoming' : 'active';
+/* Calculate next month */
+$stmt = $conn->prepare("
+    SELECT IFNULL(MAX(auction_month),0)+1 AS next_month
+    FROM auctions
+    WHERE chit_group_id=?
+");
+$stmt->bind_param("i", $groupId);
+$stmt->execute();
+$month = $stmt->get_result()->fetch_assoc()['next_month'];
 
+/* Insert */
 $stmt = $conn->prepare("
     INSERT INTO auctions
     (chit_group_id, auction_month, auction_datetime, starting_bid_amount, status)
     VALUES (?,?,?,?,?)
 ");
-
-$stmt->bind_param("iisss", $groupId, $month, $date, $start, $status);
+$stmt->bind_param("iisis", $groupId, $month, $datetime, $startingBid, $status);
 $stmt->execute();
 
-header("Location: index.php?group_id=$groupId");
+$check = $conn->prepare("
+    SELECT status FROM chit_groups WHERE id=?
+");
+$check->bind_param("i", $groupId);
+$check->execute();
+$group = $check->get_result()->fetch_assoc();
+
+if ($group['status'] === 'completed') {
+    die('Auction cannot be created. Group is completed.');
+}
+
+
+header("Location: index.php?success=1");
 exit;
-?>

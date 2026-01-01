@@ -7,7 +7,27 @@ if ($_SESSION['role'] !== 'admin') {
     exit();
 }
 
-$result = $conn->query('SELECT * FROM chit_groups ORDER BY created_at DESC');
+// $result = $conn->query('SELECT * FROM chit_groups ORDER BY created_at DESC');
+// $result = $conn->query("
+//     SELECT * 
+//     FROM chit_groups
+//     WHERE is_active = 1
+//     ORDER BY created_at DESC
+// ");
+$result = $conn->query("
+    SELECT 
+        g.*,
+        COUNT(a.id) AS completed_months
+    FROM chit_groups g
+    LEFT JOIN auctions a 
+        ON a.chit_group_id = g.id 
+        AND a.status = 'completed'
+    WHERE g.is_active = 1
+    GROUP BY g.id
+    ORDER BY g.created_at DESC
+");
+
+
 $count = $result->num_rows;
 ?>
 
@@ -66,6 +86,15 @@ $count = $result->num_rows;
 
         .btn-auction:hover {
             background-color: #1e8449;
+        }
+
+        .btn-danger {
+            background-color: #e74c3c;
+        }
+
+
+        .btn-danger:hover {
+            background-color: #c0392b;
         }
     </style>
 </head>
@@ -141,6 +170,7 @@ $count = $result->num_rows;
                                 <td>
                                     <?= $g['completed_months'] ?> / <?= $g['duration_months'] ?><br>
                                     <small><?= $percent ?>%</small>
+                                    
                                 </td>
                                 <td><?= $g['auction_type'] ?></td>
                                 <td>
@@ -152,17 +182,26 @@ $count = $result->num_rows;
                                     <!-- <a href="edit.php?id=<?= $g['id'] ?>" >
                                         <i class="fa fa-pen"></i> Edit
                                     </a> -->
-                                <a href="edit.php?id=<?= $g['id'] ?>" class="btn btn-edit">  <i class="fa fa-pen"></i>Edit</a>
+                                    <!-- <a href="edit.php?id=<?= $g['id'] ?>" class="btn btn-edit">  <i class="fa fa-pen"></i>Edit</a> -->
+                                    <?php if ($g['status'] !== 'completed'): ?>
+                                    <a href="edit.php?id=<?= $g['id'] ?>" class="btn btn-edit">
+                                        <i class="fa fa-pen"></i> 
+                                    </a>
+                                    <a href="javascript:void(0)" class="btn btn-danger"
+                                        onclick="confirmDelete(<?= (int) $g['id'] ?>)">
+                                        <i class="fa fa-trash"></i> 
+                                    </a>
+
+                                    <?php endif; ?>
 
                                     <a href="view.php?id=<?= $g['id'] ?>" class="btn btn-view">
-                                        <i class="fa fa-eye"></i> View
+                                        <i class="fa fa-eye"></i> 
                                     </a>
 
-                                    <a href="../auctions/index.php?group_id=<?= $g['id'] ?>" class="btn btn-auction">
+                                    <!-- <a href="../auctions/index.php?group_id=<?= $g['id'] ?>" class="btn btn-auction">
                                         <i class="fa fa-gavel"></i> Auctions
-                                    </a>
+                                    </a> -->
                                 </td>
-
                             </tr>
                             <?php endwhile; ?>
                         </tbody>
@@ -171,6 +210,37 @@ $count = $result->num_rows;
             </div>
         </div>
     </div>
+    <script>
+function confirmDelete(groupId) {
+    if (!groupId) {
+        alert('Invalid group ID');
+        return;
+    }
+
+    if (!confirm("Are you sure you want to delete this group?")) {
+        return;
+    }
+
+    fetch('delete.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: new URLSearchParams({ id: groupId })
+    })
+    .then(res => res.text())
+    .then(result => {
+        if (result === 'success') {
+            alert('Group deleted successfully');
+            location.reload();
+        } else {
+            alert(result);
+        }
+    });
+}
+</script>
+
+
 </body>
 
 </html>

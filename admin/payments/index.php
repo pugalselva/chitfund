@@ -116,7 +116,7 @@ $summary = $conn
                                 <th>Final</th>
                                 <th>Mode</th>
                                 <th>Status</th>
-                                <th>Action</th>
+                                <!-- <th>Action</th> -->
                             </tr>
                         </thead>
 
@@ -136,9 +136,9 @@ $summary = $conn
                                         <?= ucfirst($p['status']) ?>
                                     </span>
                                 </td>
-                                <td><a href="export_excel.php" class="btn-secondary">
+                                <!-- <td><a href="export_excel.php" class="btn-secondary">
     Export Excel
-</a>
+</a> -->
 
                             </tr>
                             <?php endwhile; ?>

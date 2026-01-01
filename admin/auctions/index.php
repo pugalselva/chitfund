@@ -6,33 +6,14 @@ if ($_SESSION['role'] !== 'admin') {
     die('Unauthorized');
 }
 
-// $groupId = (int) ($_GET['group_id'] ?? 0);
-// if (!$groupId) {
-//     die('Group ID missing');
-// }
-$groupId = $_GET['group_id'] ?? null;
-if (!$groupId) {
-    die("Group ID missing");
-}
-$groupId = (int)$groupId;
-
-
-// $au  
-
-$stmt = $conn->prepare("
-    SELECT * FROM auctions
-    WHERE chit_group_id = ?
-    ORDER BY auction_month ASC
+$auctions = $conn->query("
+    SELECT a.*, g.group_name
+    FROM auctions a
+    JOIN chit_groups g ON g.id = a.chit_group_id
+    ORDER BY a.created_at DESC
 ");
-$stmt->bind_param("i", $groupId);
-$stmt->execute();
-$auctions = $stmt->get_result();
-// if (!$groupId) {
-//     header("Location: ../groups/index.php");
-//     exit;
-// }
-
 ?>
+
 
 
 <!DOCTYPE html>
@@ -64,29 +45,26 @@ $auctions = $stmt->get_result();
                             <i class="fas fa-sign-out-alt"></i>
                         </a>
                     </div>
-
                 </div>
-
             </div>
 
             <div class="content">
 
-                <a href="create.php?group_id=<?= $groupId ?>">+ Create Auction</a>
+                <a href="create.php" class="btn-primary">＋ Create Auction</a>
 
                 <div class="table-box">
-                    <b>Scheduled Auctions (1)</b><br><br>
-
-                    <h2>Auctions</h2>
-                    <table border="1">
+                    <table>
                         <tr>
+                            <th>Group</th>
                             <th>Month</th>
-                            <th>Date</th>
+                            <th>Date & Time</th>
                             <th>Starting Bid</th>
                             <th>Status</th>
                         </tr>
 
-                        <?php while($a = $auctions->fetch_assoc()): ?>
+                        <?php while ($a = $auctions->fetch_assoc()): ?>
                         <tr>
+                            <td><?= htmlspecialchars($a['group_name']) ?></td>
                             <td><?= $a['auction_month'] ?></td>
                             <td><?= date('d-m-Y H:i', strtotime($a['auction_datetime'])) ?></td>
                             <td>₹<?= number_format($a['starting_bid_amount']) ?></td>
