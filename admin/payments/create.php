@@ -47,64 +47,60 @@ $groups = $conn->query("
                 <div class="form-box" style="max-width:600px;">
                     <h4>Payment Details</h4><br>
                     <form id="paymentForm">
-                        <div class="form-group">
-                            <label>Member *</label>
-                            <select name="member_id" class="form-control" required>
-                                <option value="">Select member</option>
-                                <?php while($m = $members->fetch_assoc()): ?>
-                                <option value="<?= $m['member_id'] ?>">
-                                    <?= $m['full_name'] ?> (<?= $m['member_id'] ?>)
-                                </option>
-                                <?php endwhile; ?>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Chit Group *</label>
-                            <select name="chit_group_id" class="form-control" required>
-                                <option value="">Select chit group</option>
-                                <?php while($g = $groups->fetch_assoc()): ?>
-                                <option value="<?= $g['id'] ?>">
-                                    <?= $g['group_name'] ?>
-                                </option>
-                                <?php endwhile; ?>
-                            </select>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Actual Amount *</label>
-                                <input type="number" name="actual_amount" required>
-                            </div>
 
-                            <div class="form-group">
-                                <label>Discount Amount</label>
-                                <input type="number" name="discount_amount" value="0">
-                                <small>Discount from auction winnings</small>
-                            </div>
-                        </div>
-                        <div class="amount-box">
-                            <span>Final Amount to Collect:</span>
-                            <b>₹<span id="final">0</span></b>
-                        </div>
-                        <div class="form-group">
-                            <label>Payment Mode *</label>
-                            <select name="payment_mode"class="form-control" required>
-                                <option value="UPI">UPI</option>
-                                <option value="CASH">Cash</option>
-                            </select>
-                        </div>
+    <!-- MEMBER -->
+    <div class="form-group">
+        <label>Member *</label>
+        <select name="member_id" id="member_id" class="form-control" required>
+            <option value="">Select member</option>
+            <?php while($m = $members->fetch_assoc()): ?>
+                <option value="<?= $m['member_id'] ?>">
+                    <?= $m['full_name'] ?> (<?= $m['member_id'] ?>)
+                </option>
+            <?php endwhile; ?>
+        </select>
+    </div>
 
-                        <div class="form-group">
-                            <label>Payment Date *</label>
-                            <input type="date" name="payment_date" required>
-                        </div>
+    <!-- GROUP -->
+    <div class="form-group">
+        <label>Chit Group *</label>
+        <select name="chit_group_id" id="chit_group_id" class="form-control" required>
+            <option value="">Select chit group</option>
+        </select>
+        <small id="monthInfo" style="color:#6b7280;"></small>
+    </div>
 
-                        <br>
-                        <button type="submit" class="btn-primary">Record Payment</button>
-                        <a href="index.php">
-                            <button type="button" class="btn-secondary">Cancel</button>
-                        </a>
+    <!-- ACTUAL -->
+    <div class="form-group">
+        <label>Actual Amount *</label>
+        <small id="auctionInfo" style="display:block;color:#6b7280;"></small>
+        <input type="number" name="actual_amount" id="actual_amount" readonly required>
+    </div>
 
-                    </form>
+    <!-- FINAL -->
+    <div class="amount-box">
+        <span>Final Amount to Collect:</span>
+        <b>₹<span id="final">0</span></b>
+    </div>
+
+    <!-- MODE -->
+    <div class="form-group">
+        <label>Payment Mode *</label>
+        <select name="payment_mode" class="form-control" required>
+            <option value="UPI">UPI</option>
+            <option value="CASH">Cash</option>
+        </select>
+    </div>
+
+    <!-- DATE -->
+    <div class="form-group">
+        <label>Payment Date *</label>
+        <input type="date" name="payment_date" required>
+    </div>
+
+    <button class="btn-primary">Record Payment</button>
+</form>
+
 
                 </div>
             </div>
@@ -140,6 +136,45 @@ $groups = $conn->query("
                 });
         });
     </script>
+    <script>
+const member = document.getElementById('member_id');
+const group  = document.getElementById('chit_group_id');
+const actual = document.getElementById('actual_amount');
+const final  = document.getElementById('final');
+const auctionInfo = document.getElementById('auctionInfo');
+const monthInfo = document.getElementById('monthInfo');
+
+/* Load groups */
+member.addEventListener('change', () => {
+    fetch(`fetch_member_groups.php?member_id=${member.value}`)
+        .then(r => r.json())
+        .then(data => {
+            group.innerHTML = '<option value="">Select chit group</option>';
+            data.forEach(g => {
+                group.innerHTML += `<option value="${g.id}">${g.group_name}</option>`;
+            });
+        });
+});
+
+/* Load amount */
+group.addEventListener('change', () => {
+    fetch(`fetch_payment_amount.php?group_id=${group.value}&member_id=${member.value}`)
+        .then(r => r.json())
+        .then(res => {
+            if (res.error) {
+                alert(res.error);
+                return;
+            }
+
+            actual.value = res.amount;
+            final.innerText = res.amount;
+            auctionInfo.innerText =
+                `Last auction total ₹${res.total} → Per member ₹${res.amount}`;
+            monthInfo.innerText = `Payment for Month ${res.month}`;
+        });
+});
+</script>
+
 
 </body>
 
