@@ -207,6 +207,9 @@ $count = $result->num_rows;
                                     <a href="view.php?id=<?= $g['id'] ?>" class="btn btn-view">
                                         <i class="fa fa-eye"></i>
                                     </a>
+<a href="idview.php?id=<?= $g['id'] ?>" class="btn btn-view">idview
+    <i class="fa fa-eye"></i>
+</a>
 
                                     <!-- <a href="../auctions/index.php?group_id=<?= $g['id'] ?>" class="btn btn-auction">
                                         <i class="fa fa-gavel"></i> Auctions

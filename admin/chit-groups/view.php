@@ -56,10 +56,9 @@ $progress = $total > 0 ? round(($completed / $total) * 100) : 0;
             </div>
 
             <div class="content">
-                 <a href="../auctions/index.php?group_id=<?= $group['id'] ?>"
-   class="btn btn-primary mb-3">
-   <i class="fa fa-gavel me-1"></i> View Auctions
-</a>
+                <a href="../auctions/index.php?group_id=<?= $group['id'] ?>" class="btn btn-primary mb-3">
+                    <i class="fa fa-gavel me-1"></i> View Auctions
+                </a>
 
 
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
@@ -126,7 +125,7 @@ $progress = $total > 0 ? round(($completed / $total) * 100) : 0;
                 </div>
             </div>
         </div>
-        </div>
+    </div>
 </body>
 
 </html>

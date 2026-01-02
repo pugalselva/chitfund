@@ -2,8 +2,10 @@
 session_start();
 include '../../config/database.php';
 
-if ($_SESSION['role'] !== 'admin') {
-    die('Unauthorized');
+
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+    header("Location: ../../index.php");
+    exit;
 }
 
 $auctions = $conn->query("
@@ -13,7 +15,6 @@ $auctions = $conn->query("
     ORDER BY a.created_at DESC
 ");
 ?>
-
 
 
 <!DOCTYPE html>
