@@ -33,16 +33,24 @@
                     </button>
                 </div>
 
-              <form method="post" action="store.php" enctype="multipart/form-data">
+                <form method="post" action="store.php" enctype="multipart/form-data">
 
                     <!-- ================= PERSONAL DETAILS ================= -->
                     <div id="personal" class="step-content active form-box">
 
                         <h4>Personal Information</h4><br>
-
-                        <div class="form-group">
-                            <label>Full Name *</label>
-                            <input class="form-control" name="full_name" required>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Full Name *</label>
+                                <input class="form-control" name="full_name" required>
+                            </div>
+                             <div class="form-group">
+        <label>UTR ID *</label>
+        <input class="form-control" name="utr_id" required>
+        <small style="font-size:12px;color:#555;">
+            UTR ID will be used as login password
+        </small>
+    </div>
                         </div>
 
                         <div class="form-row">
@@ -90,7 +98,7 @@
                             </div>
                         </div>
 
-                        <div class="form-row">
+                        <!-- <div class="form-row">
                             <div class="form-group">
                                 <label>Password *</label>
                                 <input type="password" class="form-control" name="password" required>
@@ -100,10 +108,10 @@
                                 <label>Confirm Password *</label>
                                 <input type="password" class="form-control" name="confirm_password" required>
                             </div>
-                        </div>
+                        </div> -->
                         <div class="form-group">
-                            <label>Cancelled Cheque / Passbook Photo *</label>
-                            <input type="file" class="form-control" name="photo" >
+                            <label>Upload Photo *</label>
+                            <input type="file" class="form-control" name="photo">
                         </div>
                         <div class="form-group">
                             <label>Active Status</label><br><br>
@@ -145,14 +153,17 @@
 
                             <div class="form-group">
                                 <label>Bank Name *</label>
-                                <input class="form-control" name="bank_name" required>
+                                <input class="form-control" name="bank_name" id="bank_name" required readonly>
                             </div>
                         </div>
 
                         <div class="form-row">
                             <div class="form-group">
                                 <label>IFSC Code *</label>
-                                <input class="form-control" name="ifsc" required>
+                                <input class="form-control" name="ifsc" id="ifsc" required
+                                    placeholder="e.g. HDFC0000123" onblur="validateIFSC()">
+
+                                <small id="ifscMsg" style="font-size:12px;"></small>
                             </div>
 
                             <div class="form-group">
@@ -160,6 +171,7 @@
                                 <input class="form-control" name="upi">
                             </div>
                         </div>
+
 
                         <div class="form-group">
                             <label>Cancelled Cheque / Passbook Photo *</label>
@@ -186,6 +198,55 @@
             </div>
         </div>
     </div>
+    <!-- script -->
+    <script>
+        let ifscValid = false;
+
+        function validateIFSC() {
+            const ifscInput = document.getElementById('ifsc');
+            const bankName = document.getElementById('bank_name');
+            const msg = document.getElementById('ifscMsg');
+
+            const ifsc = ifscInput.value.trim().toUpperCase();
+
+            // Reset
+            msg.textContent = '';
+            bankName.value = '';
+            ifscValid = false;
+
+            if (!ifsc) return;
+
+            msg.style.color = '#6b7280';
+            msg.textContent = 'Validating IFSC...';
+
+            fetch(`https://ifsc.razorpay.com/${ifsc}`)
+                .then(res => {
+                    if (!res.ok) throw new Error('Invalid IFSC');
+                    return res.json();
+                })
+                .then(data => {
+                    bankName.value = data.BANK;
+                    msg.textContent = `✔ ${data.BANK}, ${data.BRANCH}`;
+                    msg.style.color = '#16a34a';
+                    ifscValid = true;
+                })
+                .catch(() => {
+                    msg.textContent = '✖ Invalid IFSC Code';
+                    msg.style.color = '#dc2626';
+                    ifscInput.focus();
+                });
+        }
+    </script>
+    <script>
+        document.querySelector('form').addEventListener('submit', function(e) {
+
+            if (!ifscValid) {
+                e.preventDefault();
+                alert('Please enter a valid IFSC code');
+                document.getElementById('ifsc').focus();
+            }
+        });
+    </script>
 
     <script>
         function showStep(step) {

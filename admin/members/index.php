@@ -109,6 +109,7 @@ $count = $result->num_rows;
                         <thead>
                             <tr>
                                 <th>Member ID</th>
+                                <th>UTR ID</th>
                                 <th>Full Name</th>
                                 <th>Gender</th>
                                 <th>Mobile</th>
@@ -123,6 +124,7 @@ $count = $result->num_rows;
                             <?php while ($m = $result->fetch_assoc()): ?>
                             <tr>
                                 <td><?= htmlspecialchars($m['member_id']) ?></td>
+                                <td><?= htmlspecialchars($m['utr_id']) ?></td>
 
                                 <td>
                                     <strong><?= htmlspecialchars($m['full_name']) ?></strong><br>
@@ -135,9 +137,11 @@ $count = $result->num_rows;
                                 <td><?= date('d M Y', strtotime($m['joining_date'])) ?></td>
 
                                 <td>
-                                    <span class="badge <?= $m['is_active'] ? 'active' : 'inactive' ?>">
-                                        <?= $m['is_active'] ? 'Active' : 'Inactive' ?>
-                                    </span>
+                                    <label class="switch">
+                                        <input type="checkbox" <?= $m['is_active'] ? 'checked' : '' ?>
+                                            onchange="toggleStatus('<?= $m['member_id'] ?>', this.checked)">
+                                        <span class="slider"></span>
+                                    </label>
                                 </td>
 
                                 <td class="action-buttons">
@@ -192,6 +196,25 @@ $count = $result->num_rows;
                 });
         }
     </script>
+    <script>
+        function toggleStatus(memberId, status) {
+            fetch('toggle-status.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: new URLSearchParams({
+                        member_id: memberId,
+                        status: status ? 1 : 0
+                    })
+                })
+                .then(r => r.text())
+                .then(res => {
+                    if (res !== 'success') alert(res);
+                });
+        }
+    </script>
+
 
 </body>
 

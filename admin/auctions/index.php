@@ -1,6 +1,8 @@
 <?php
 session_start();
 include '../../config/database.php';
+include 'auto-close.php';  
+include 'auto-status.php';
 
 
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
@@ -59,6 +61,7 @@ $auctions = $conn->query("
                             <th>Group</th>
                             <th>Month</th>
                             <th>Date & Time</th>
+                            <th>End</th>
                             <th>Starting Bid</th>
                             <th>Status</th>
                         </tr>
@@ -68,16 +71,19 @@ $auctions = $conn->query("
                             <td><?= htmlspecialchars($a['group_name']) ?></td>
                             <td><?= $a['auction_month'] ?></td>
                             <td><?= date('d-m-Y H:i', strtotime($a['auction_datetime'])) ?></td>
+                            <td><?= date('d-m-Y H:i', strtotime($a['auction_end_datetime'])) ?></td>
                             <td>₹<?= number_format($a['starting_bid_amount']) ?></td>
+
                             <!-- <td><?= ucfirst($a['status']) ?></td> -->
                             <td>
                                 <?= ucfirst($a['status']) ?>
 
                                 <?php if ($a['status'] !== 'completed'): ?>
-                                <button class="btn-danger" onclick="closeAuction(<?= (int) $a['id'] ?>)">
-                                    Close
-                                </button>
-                                <?php endif; ?>
+    <button class="btn-danger" onclick="closeAuction(<?= (int) $a['id'] ?>)">
+        Close
+    </button>
+<?php endif; ?>
+
                             </td>
                         </tr>
                         <?php endwhile; ?>

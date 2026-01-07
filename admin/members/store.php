@@ -5,19 +5,14 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     die("Invalid access");
 }
 
-/* ---------- PASSWORD ---------- */
-$password = $_POST['password'] ?? '';
-$confirm  = $_POST['confirm_password'] ?? '';
-
-if ($password === '' || $confirm === '') {
-    die("Password missing");
+/* ---------- REQUIRED FIELDS ---------- */
+if (empty($_POST['utr_id'])) {
+    die("UTR ID is required");
 }
 
-if ($password !== $confirm) {
-    die("Password mismatch");
-}
-
-$passwordHash = password_hash($password, PASSWORD_DEFAULT);
+/* ---------- AUTO PASSWORD FROM UTR ---------- */
+$utrId = trim($_POST['utr_id']);
+$passwordHash = password_hash($utrId, PASSWORD_DEFAULT);
 
 /* ---------- STATUS ---------- */
 $status = isset($_POST['status']) ? 1 : 0;
@@ -31,12 +26,23 @@ $bankDoc = '';
 
 if (!empty($_FILES['photo']['name'])) {
     $photo = time().'_photo_'.$_FILES['photo']['name'];
-    move_uploaded_file($_FILES['photo']['tmp_name'], '../../uploads/members/'.$photo);
+    move_uploaded_file(
+        $_FILES['photo']['tmp_name'],
+        '../../uploads/members/'.$photo
+    );
 }
 
 if (!empty($_FILES['bank_doc']['name'])) {
     $bankDoc = time().'_bank_'.$_FILES['bank_doc']['name'];
-    move_uploaded_file($_FILES['bank_doc']['tmp_name'], '../../uploads/bank/'.$bankDoc);
+    move_uploaded_file(
+        $_FILES['bank_doc']['tmp_name'],
+        '../../uploads/bank/'.$bankDoc
+    );
+}
+
+/* ---------- IFSC VALIDATION ---------- */
+if (empty($_POST['ifsc']) || strlen($_POST['ifsc']) !== 11) {
+    die('Invalid IFSC code');
 }
 
 /* ---------- 1. CREATE LOGIN ---------- */
@@ -53,15 +59,16 @@ $userId = $stmt->insert_id;
 /* ---------- 2. MEMBER DETAILS ---------- */
 $stmt = $conn->prepare("
     INSERT INTO members
-    (member_id, user_id, full_name, gender, dob, address, aadhar, mobile, email, joining_date, photo, is_active)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    (member_id, user_id, utr_id, full_name, gender, dob, address, aadhar, mobile, email, joining_date, photo, is_active)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 ");
 if (!$stmt) die($conn->error);
 
 $stmt->bind_param(
-    "sisssssssssi",
+    "sissssssssssi",
     $memberId,
     $userId,
+    $utrId,
     $_POST['full_name'],
     $_POST['gender'],
     $_POST['dob'],

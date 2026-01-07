@@ -116,7 +116,7 @@ $summary = $conn
                                 <th>Final</th>
                                 <th>Mode</th>
                                 <th>Status</th>
-                                <!-- <th>Action</th> -->
+                                <th>Action</th>
                             </tr>
                         </thead>
 
@@ -137,16 +137,19 @@ $summary = $conn
                                     </span>
                                 </td>
                                 <!-- <td><a href="export_excel.php" class="btn-secondary">
-    Export Excel
-</a> -->
+                                    Export Excel
+                                </a> -->
+                                <td>
+    <button class="btn-secondary"
+        onclick="openInvoice('<?= $p['receipt_no'] ?>')">
+        <i class="fa fa-file-invoice"></i> Invoice
+    </button>
+</td>
 
                             </tr>
                             <?php endwhile; ?>
                         </tbody>
                     </table>
-
-
-
                 </div>
             </div>
         </div>
@@ -196,3 +199,9 @@ $summary = $conn
         });
     }
 </script>
+<script>
+function openInvoice(receipt){
+    window.open('invoice.php?receipt='+receipt,'_blank');
+}
+</script>
+

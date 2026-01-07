@@ -3,51 +3,63 @@ session_start();
 include '../../config/database.php';
 
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
-    http_response_code(403);
     die('Unauthorized');
 }
 
-if (empty($_POST['member_id'])) {
-    http_response_code(400);
-    die('Invalid member ID');
-}
+$memberId = $_POST['member_id'] ?? '';
+if (!$memberId) die('Invalid member ID');
 
-$memberId = $_POST['member_id'];
-
-/* Check member exists */
-$check = $conn->prepare("
-    SELECT member_id FROM members WHERE member_id=?
-");
-$check->bind_param("s", $memberId);
-$check->execute();
-
-if ($check->get_result()->num_rows === 0) {
-    die('Member not found');
-}
-
-/* Prevent delete if member has payments */
+/* 1. Prevent delete if payments exist */
 $q = $conn->prepare("
     SELECT COUNT(*) AS cnt 
     FROM payments 
-    WHERE member_id=?
+    WHERE member_id = ?
 ");
 $q->bind_param("s", $memberId);
 $q->execute();
-
 $cnt = $q->get_result()->fetch_assoc()['cnt'];
 
 if ($cnt > 0) {
     die('Cannot delete member with payments');
 }
 
-/* Soft delete member */
+/* 2. Get linked user_id */
+$getUser = $conn->prepare("
+    SELECT user_id FROM members WHERE member_id = ?
+");
+$getUser->bind_param("s", $memberId);
+$getUser->execute();
+$userRow = $getUser->get_result()->fetch_assoc();
+$userId  = $userRow['user_id'] ?? null;
+
+/* 3. Delete group mappings */
 $stmt = $conn->prepare("
-    UPDATE members 
-    SET is_active=0 
-    WHERE member_id=?
+    DELETE FROM chit_group_members WHERE member_id = ?
 ");
 $stmt->bind_param("s", $memberId);
 $stmt->execute();
 
-echo 'success';
-?>
+/* 4. Delete bank details */
+$stmt = $conn->prepare("
+    DELETE FROM member_bank_details WHERE member_id = ?
+");
+$stmt->bind_param("s", $memberId);
+$stmt->execute();
+
+/* 5. Delete member */
+$stmt = $conn->prepare("
+    DELETE FROM members WHERE member_id = ?
+");
+$stmt->bind_param("s", $memberId);
+$stmt->execute();
+
+/* 6. Delete login */
+if ($userId) {
+    $stmt = $conn->prepare("
+        DELETE FROM users WHERE id = ?
+    ");
+    $stmt->bind_param("i", $userId);
+    $stmt->execute();
+}
+
+echo "success";

@@ -53,27 +53,188 @@ $maxMembers = (int) $g['total_members'];
     <title>View Chit Group</title>
     <link rel="stylesheet" href="../../assets/css/style.css">
     <style>
+                /* ===============================
+        PAGE STRUCTURE
+        ================================ */
+        .wrapper {
+            display: flex;
+            min-height: 100vh;
+            background: #f8fafc;
+        }
+
+        .main {
+            flex: 1;
+            padding: 24px 28px;
+        }
+
+                /* ===============================
+        TOPBAR
+        ================================ */
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .page-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #111827;
+        }
+
+        .page-subtitle {
+            font-size: 13px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+
+                /* ===============================
+        CONTENT
+        ================================ */
+        .content {
+            max-width: 1100px;
+        }
+
+                /* ===============================
+        GROUP DETAILS CARD
+        ================================ */
+        .form-box {
+            background: #ffffff;
+            border-radius: 14px;
+            padding: 26px 28px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .form-box h3 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 20px;
+        }
+
+        /* Group info rows */
+        .form-box p {
+            font-size: 14px;
+            color: #374151;
+            margin-bottom: 10px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .form-box p b {
+            color: #111827;
+            min-width: 170px;
+        }
+
+                /* ===============================
+        STATUS BADGES
+        ================================ */
         .badge {
-            padding: 4px 8px;
-            border-radius: 6px;
-            color: #fff;
-            font-size: 12px
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: capitalize;
         }
 
-        .active {
-            background: #16a34a
+        /* Badge colors */
+        .badge.upcoming {
+            background: #eef2ff;
+            color: #4338ca;
         }
 
-        .upcoming {
-            background: #2563eb
+        .badge.active {
+            background: #ecfdf5;
+            color: #047857;
         }
 
-        .completed {
-            background: #6b7280
+        .badge.completed {
+            background: #f3f4f6;
+            color: #374151;
         }
 
-        .search-box {
-            margin-bottom: 10px
+        /* ===============================
+        MEMBERS TABLE CARD
+        ================================ */
+        .table-box {
+            margin-top: 28px;
+            background: #ffffff;
+            border-radius: 14px;
+            padding: 24px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .table-box h3 {
+            font-size: 17px;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 14px;
+        }
+
+        /* ===============================
+        TABLE
+        ================================ */
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13.5px;
+        }
+
+        .table thead {
+            background: #f9fafb;
+        }
+
+        .table th {
+            text-align: left;
+            font-weight: 600;
+            color: #374151;
+            padding: 12px 10px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .table td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #e5e7eb;
+            color: #111827;
+        }
+
+        .table tbody tr:hover {
+            background: #f8fafc;
+        }
+
+        /* ===============================
+        BACK BUTTON
+        ================================ */
+        .btn-secondary {
+            display: inline-block;
+            margin-top: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #4338ca;
+            text-decoration: none;
+        }
+
+        .btn-secondary:hover {
+            text-decoration: underline;
+        }
+
+        /* ===============================
+        RESPONSIVE
+        ================================ */
+        @media (max-width: 900px) {
+            .main {
+                padding: 18px;
+            }
+
+            .form-box p {
+                flex-direction: column;
+                gap: 2px;
+            }
+
+            .form-box p b {
+                min-width: auto;
+            }
         }
     </style>
 </head>
@@ -99,7 +260,6 @@ $maxMembers = (int) $g['total_members'];
 
                     <p><b>Group Code:</b> <?= $g['group_code'] ?></p>
                     <p><b>Auction Type:</b> <?= $g['auction_type'] ?></p>
-                    <p><b>Monthly Contribution:</b> ₹<?= number_format($g['monthly_contribution']) ?></p>
                     <p><b>Duration:</b> <?= $g['duration_months'] ?> months</p>
                     <p><b>Status:</b>
                         <span class="badge <?= $g['status'] ?>">
@@ -107,7 +267,7 @@ $maxMembers = (int) $g['total_members'];
                         </span>
                     </p>
 
-                    <p><b>Members:</b> <?= $assignedCount    ?> / <?= $maxMembers ?></p>
+                    <p><b>Members:</b> <?= $assignedCount ?> / <?= $maxMembers ?></p>
                 </div>
 
                 <!-- 🔹 MEMBERS LIST -->
@@ -162,4 +322,5 @@ $maxMembers = (int) $g['total_members'];
     </script>
 
 </body>
+
 </html>

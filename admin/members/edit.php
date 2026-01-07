@@ -41,12 +41,12 @@ if ($result->num_rows === 0) {
 
 $m = $result->fetch_assoc();
 
-
 // if ($result->num_rows === 0) {
 //     die('Member not found');
 // }
 
 // $m = $result->fetch_assoc();
+
 ?>
 
 <!DOCTYPE html>
@@ -141,6 +141,19 @@ $m = $result->fetch_assoc();
                                 <label>Joining Date *</label>
                                 <input type="date" class="form-control" name="joining_date"
                                     value="<?= $m['joining_date'] ?>" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>New Password</label>
+                                <input type="password" class="form-control" name="new_password">
+                                <small>Leave blank to keep existing password</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Confirm New Password</label>
+                                <input type="password" class="form-control" name="confirm_password">
                             </div>
                         </div>
 

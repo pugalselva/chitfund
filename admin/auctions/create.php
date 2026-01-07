@@ -63,6 +63,12 @@ $groups = $conn->query("
                             <label>Auction Date & Time *</label>
                             <input type="datetime-local" name="auction_datetime" class="form-control" required>
                         </div>
+                        <!-- AUCTION END -->
+<div class="form-group">
+    <label>Auction End Date & Time *</label>
+    <input type="datetime-local" name="auction_end_datetime"
+           class="form-control" required>
+</div>
 
                         <!-- STARTING BID -->
                         <div class="form-group">

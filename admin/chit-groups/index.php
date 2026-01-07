@@ -136,7 +136,7 @@ $count = $result->num_rows;
                                 <th>Group Name</th>
                                 <th>Total Value</th>
                                 <th>Members</th>
-                                <th>Contribution</th>
+                                <!-- <th>Contribution</th> -->
                                 <th>Duration</th>
                                 <th>Current Month Progress</th>
                                 <th>Auction Type</th>
@@ -175,7 +175,6 @@ $count = $result->num_rows;
                                 </td>
                                 <td>₹<?= number_format($g['total_value']) ?></td>
                                 <td><?= $g['total_members'] ?></td>
-                                <td>₹<?= number_format($g['monthly_contribution']) ?></td>
                                 <td><?= $g['duration_months'] ?> months</td>
                                 <td>
                                     <?= $g['completed_months'] ?> / <?= $g['duration_months'] ?><br>
@@ -207,9 +206,9 @@ $count = $result->num_rows;
                                     <a href="view.php?id=<?= $g['id'] ?>" class="btn btn-view">
                                         <i class="fa fa-eye"></i>
                                     </a>
-<a href="idview.php?id=<?= $g['id'] ?>" class="btn btn-view">idview
-    <i class="fa fa-eye"></i>
-</a>
+                                    <a href="idview.php?id=<?= $g['id'] ?>" class="btn btn-view">idview
+                                        <i class="fa fa-eye"></i>
+                                    </a>
 
                                     <!-- <a href="../auctions/index.php?group_id=<?= $g['id'] ?>" class="btn btn-auction">
                                         <i class="fa fa-gavel"></i> Auctions

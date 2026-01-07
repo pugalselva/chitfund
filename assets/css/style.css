@@ -918,3 +918,38 @@ mode.cash{ }
     opacity:.9;
 }
 /* end */
+/* toast notification */
+.toast{
+    position:fixed;
+    top:20px;
+    right:20px;
+    min-width:260px;
+    background:#16a34a;
+    color:#fff;
+    padding:14px 16px;
+    border-radius:12px;
+    display:none;
+    align-items:center;
+    gap:10px;
+    z-index:10000;
+    box-shadow:0 10px 25px rgba(0,0,0,.2);
+    animation: slideIn .3s ease;
+}
+
+.toast.error{ background:#dc2626; }
+.toast.warning{ background:#ea580c; }
+
+.toast-icon{ font-size:18px; }
+.toast-close{
+    background:none;
+    border:none;
+    color:#fff;
+    cursor:pointer;
+    font-size:16px;
+}
+
+@keyframes slideIn{
+    from{ transform:translateX(120%); opacity:0 }
+    to{ transform:translateX(0); opacity:1 }
+}
+
