@@ -1,3 +1,33 @@
+<?php
+session_start();
+include '../config/database.php';
+
+if ($_SESSION['role'] !== 'member') {
+    header("Location: ../index.php");
+    exit;
+}
+
+$memberId = $_SESSION['member_id'];
+
+/* Fetch member chit groups with completed months */
+$stmt = $conn->prepare("
+SELECT 
+    g.*,
+    COUNT(a.id) AS completed_months
+FROM chit_groups g
+JOIN chit_group_members gm ON gm.group_id = g.id
+LEFT JOIN auctions a 
+    ON a.chit_group_id = g.id 
+    AND a.status = 'completed'
+WHERE gm.member_id = ?
+GROUP BY g.id
+ORDER BY g.created_at DESC
+");
+
+$stmt->bind_param("s", $memberId);
+$stmt->execute();
+$result = $stmt->get_result();
+?>
 <!DOCTYPE html>
 <html>
 
@@ -17,48 +47,51 @@
             <div class="topbar">
                 <div>
                     <div class="page-title">My Chit Groups</div>
-                    <div class="page-subtitle">View and manage your active chit fund memberships</div>
+                    <div class="page-subtitle">View and manage your chit memberships</div>
                 </div>
-    <div class="topbar">
-                <div>
+                <div style="text-align:right">
                     <b>Member User</b><br>
-                    sandy@gmail.com
-                    <a href="../logout.php" class="btn btn-danger">
-                        <i class="fas fa-sign-out-alt"></i>
-                    </a>
+                    <?= htmlspecialchars($_SESSION['email'] ?? '') ?>
                 </div>
-
-            </div>
             </div>
 
             <div class="content">
 
                 <div class="chit-grid">
 
-                    <!-- CHIT 1 -->
+                    <?php if ($result->num_rows === 0): ?>
+                    <p>No chit groups assigned to you.</p>
+                    <?php endif; ?>
+
+                    <?php while ($g = $result->fetch_assoc()): 
+
+    $completed = (int)$g['completed_months'];
+    $duration  = (int)$g['duration_months'];
+    $remaining = max(0, $duration - $completed);
+    $percent   = $duration > 0 ? round(($completed / $duration) * 100) : 0;
+?>
+
                     <div class="chit-card">
+
+                        <!-- HEADER -->
                         <div class="chit-header">
                             <div>
-                                <div class="chit-title">Elite Savings Group</div>
-                                <small>CG001</small>
+                                <div class="chit-title"><?= htmlspecialchars($g['group_name']) ?></div>
+                                <small><?= htmlspecialchars($g['group_code']) ?></small>
                             </div>
-                            <span class="badge active">active</span>
+                            <span class="badge <?= $g['status'] ?>">
+                                <?= ucfirst($g['status']) ?>
+                            </span>
                         </div>
 
+                        <!-- STATS -->
                         <div class="chit-stats">
+
                             <div class="stat">
                                 <div class="icon icon-blue">₹</div>
                                 <div>
-                                    Monthly Contribution<br>
-                                    <b>₹10,000</b>
-                                </div>
-                            </div>
-
-                            <div class="stat">
-                                <div class="icon icon-purple">💼</div>
-                                <div>
                                     Pool Amount<br>
-                                    <b>₹2,50,000</b>
+                                    <b>₹<?= number_format($g['total_value']) ?></b>
                                 </div>
                             </div>
 
@@ -66,7 +99,7 @@
                                 <div class="icon icon-green">👥</div>
                                 <div>
                                     Total Members<br>
-                                    <b>25</b>
+                                    <b><?= $g['total_members'] ?></b>
                                 </div>
                             </div>
 
@@ -74,140 +107,58 @@
                                 <div class="icon icon-orange">📅</div>
                                 <div>
                                     Duration<br>
-                                    <b>25 months</b>
+                                    <b><?= $duration ?> months</b>
                                 </div>
                             </div>
+
+                            <div class="stat">
+                                <div class="icon icon-purple">🔨</div>
+                                <div>
+                                    Auction Type<br>
+                                    <b><?= $g['auction_type'] ?></b>
+                                </div>
+                            </div>
+
                         </div>
 
+                        <!-- PROGRESS -->
                         <small>Progress</small>
                         <div class="progress-bar">
-                            <div class="progress" style="width:48%;"></div>
+                            <div class="progress" style="width:<?= $percent ?>%"></div>
                         </div>
-                        <small>12 / 25 months</small>
+                        <small><?= $completed ?> / <?= $duration ?> months</small>
 
+                        <!-- FOOTER -->
                         <div class="chit-footer">
                             <div>
                                 Completed Months<br>
-                                <b>12</b>
+                                <b><?= $completed ?></b>
                             </div>
                             <div>
                                 Remaining Months<br>
-                                <b>13</b>
+                                <b><?= $remaining ?></b>
                             </div>
                             <div>
                                 Auction Type<br>
-                                <b>Reverse</b>
+                                <b><?= $g['auction_type'] ?></b>
                             </div>
                             <div>
                                 Foreman Commission<br>
-                                <b>5%</b>
+                                <b><?= $g['commission'] ?>%</b>
                             </div>
                         </div>
 
+                        <!-- TOTAL -->
                         <div class="chit-total">
                             Total Chit Value<br>
-                            <b>₹25,00,000</b>
+                            <b>₹<?= number_format($g['total_value']) ?></b>
                         </div>
+
                     </div>
 
-                    <!-- CHIT 2 -->
-                    <div class="chit-card">
-                        <div class="chit-header">
-                            <div>
-                                <div class="chit-title">Business Circle</div>
-                                <small>CG002</small>
-                            </div>
-                            <span class="badge active">active</span>
-                        </div>
-
-                        <div class="chit-stats">
-                            <div class="stat">
-                                <div class="icon icon-blue">₹</div>
-                                <div>Monthly Contribution<br><b>₹15,000</b></div>
-                            </div>
-                            <div class="stat">
-                                <div class="icon icon-purple">💼</div>
-                                <div>Pool Amount<br><b>₹3,00,000</b></div>
-                            </div>
-                            <div class="stat">
-                                <div class="icon icon-green">👥</div>
-                                <div>Total Members<br><b>20</b></div>
-                            </div>
-                            <div class="stat">
-                                <div class="icon icon-orange">📅</div>
-                                <div>Duration<br><b>20 months</b></div>
-                            </div>
-                        </div>
-
-                        <small>Progress</small>
-                        <div class="progress-bar">
-                            <div class="progress" style="width:35%;"></div>
-                        </div>
-                        <small>7 / 20 months</small>
-
-                        <div class="chit-footer">
-                            <div>Completed Months<br><b>7</b></div>
-                            <div>Remaining Months<br><b>13</b></div>
-                            <div>Auction Type<br><b>Reverse</b></div>
-                            <div>Foreman Commission<br><b>5%</b></div>
-                        </div>
-
-                        <div class="chit-total">
-                            Total Chit Value<br>
-                            <b>₹30,00,000</b>
-                        </div>
-                    </div>
-
-                    <!-- CHIT 3 -->
-                    <div class="chit-card">
-                        <div class="chit-header">
-                            <div>
-                                <div class="chit-title">Community Fund</div>
-                                <small>CG003</small>
-                            </div>
-                            <span class="badge upcoming">upcoming</span>
-                        </div>
-
-                        <div class="chit-stats">
-                            <div class="stat">
-                                <div class="icon icon-blue">₹</div>
-                                <div>Monthly Contribution<br><b>₹5,000</b></div>
-                            </div>
-                            <div class="stat">
-                                <div class="icon icon-purple">💼</div>
-                                <div>Pool Amount<br><b>₹1,50,000</b></div>
-                            </div>
-                            <div class="stat">
-                                <div class="icon icon-green">👥</div>
-                                <div>Total Members<br><b>30</b></div>
-                            </div>
-                            <div class="stat">
-                                <div class="icon icon-orange">📅</div>
-                                <div>Duration<br><b>30 months</b></div>
-                            </div>
-                        </div>
-
-                        <small>Progress</small>
-                        <div class="progress-bar">
-                            <div class="progress" style="width:0%;"></div>
-                        </div>
-                        <small>0 / 30 months</small>
-
-                        <div class="chit-footer">
-                            <div>Completed Months<br><b>0</b></div>
-                            <div>Remaining Months<br><b>30</b></div>
-                            <div>Auction Type<br><b>Open</b></div>
-                            <div>Foreman Commission<br><b>4%</b></div>
-                        </div>
-
-                        <div class="chit-total">
-                            Total Chit Value<br>
-                            <b>₹15,00,000</b>
-                        </div>
-                    </div>
+                    <?php endwhile; ?>
 
                 </div>
-
             </div>
         </div>
     </div>

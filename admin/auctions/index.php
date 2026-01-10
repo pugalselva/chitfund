@@ -54,6 +54,7 @@ $auctions = $conn->query("
             <div class="content">
 
                 <a href="create.php" class="btn-primary">＋ Create Auction</a>
+                <a href="all_bidding_view.php" class="btn-primary"> Live Auction</a>
 
                 <div class="table-box">
                     <table>
@@ -64,6 +65,7 @@ $auctions = $conn->query("
                             <th>End</th>
                             <th>Starting Bid</th>
                             <th>Status</th>
+                            <!-- <th>Auctions</th> -->
                         </tr>
 
                         <?php while ($a = $auctions->fetch_assoc()): ?>
@@ -79,10 +81,10 @@ $auctions = $conn->query("
                                 <?= ucfirst($a['status']) ?>
 
                                 <?php if ($a['status'] !== 'completed'): ?>
-    <button class="btn-danger" onclick="closeAuction(<?= (int) $a['id'] ?>)">
-        Close
-    </button>
-<?php endif; ?>
+                                    <button class="btn-danger" onclick="closeAuction(<?= (int) $a['id'] ?>)">
+                                        Close
+                                    </button>
+                                <?php endif; ?>
 
                             </td>
                         </tr>

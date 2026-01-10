@@ -5,5 +5,4 @@ if ($conn->connect_error) {
 }
 // var_dump($conn);
 // exit;
-
 ?>

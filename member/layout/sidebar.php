@@ -15,20 +15,23 @@ $base = "/statice_design_chitfund/member/";
        class="<?= $currentPage=='my-chits.php'?'active':'' ?>">
         📦 My-Chit
     </a>
-
-    <a href="<?= $base ?>live-auction.php"
+<a href="<?= $base ?>auctions_view.php"
+       class="<?= $currentPage=='live-auction.php'?'active':'' ?>">
+        🔥 Auction view
+    </a>
+    <!-- <a href="<?= $base ?>live-auction.php"
        class="<?= $currentPage=='live-auction.php'?'active':'' ?>">
         🔥 Live Auction
-    </a>
+    </a> -->
 
     <a href="<?= $base ?>auction-history.php"
        class="<?= $currentPage=='auction-history.php'?'active':'' ?>">
         🔨 Auctions History
     </a>
 
-    <a href="<?= $base ?>payments.php"
-       class="<?= $currentPage=='payments.php'?'active':'' ?>">
-        💰 Payments
+    <a href="<?= $base ?>payment-history.php"
+       class="<?= $currentPage=='payment-history.php'?'active':'' ?>">
+        💰 Payments Records
     </a>
 
     <a href="<?= $base ?>profile.php"

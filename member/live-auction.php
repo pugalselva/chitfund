@@ -19,6 +19,29 @@ if ($q->num_rows == 0) {
 $auction = $q->fetch_assoc();
 $auctionId = $auction['id'];
 $poolAmount = $auction['starting_bid_amount'];
+
+// session_start();
+// include '../config/database.php';
+
+// if ($_SESSION['role'] !== 'member') die('Unauthorized');
+
+// $memberId  = $_SESSION['member_id'];
+// $auctionId = (int)($_GET['auction_id'] ?? 0);
+
+// $stmt = $conn->prepare("
+// SELECT a.*, g.group_name
+// FROM auctions a
+// JOIN chit_groups g ON g.id = a.chit_group_id
+// JOIN chit_group_members gm ON gm.group_id = g.id
+// WHERE a.id=? AND a.status='active' AND gm.member_id=?
+// ");
+// $stmt->bind_param("is", $auctionId, $memberId);
+// $stmt->execute();
+// $auction = $stmt->get_result()->fetch_assoc();
+
+// if (!$auction) {
+//     die("No live auction available");
+// }
 ?>
 
 
@@ -35,15 +58,12 @@ $poolAmount = $auction['starting_bid_amount'];
 
     <div class="wrapper">
         <?php include 'layout/sidebar.php'; ?>
-
         <div class="main">
-
             <div class="topbar">
                 <div>
                     <div class="page-title">Live Auction</div>
                     <div class="page-subtitle">Place your bid now</div>
                 </div>
-
                 <div class="topbar">
                     <div>
                         <b>Member User</b><br>
@@ -52,56 +72,41 @@ $poolAmount = $auction['starting_bid_amount'];
                             <i class="fas fa-sign-out-alt"></i>
                         </a>
                     </div>
-
                 </div>
             </div>
+            <div class="content">
+                <div class="auction-box">
+                    <h4>🔨 <?= $auction['group_name'] ?> - Month <?= $auction['auction_month'] ?></h4>
+                    <small>Pool Amount: ₹<?= number_format($poolAmount) ?></small>
+                    <!-- CURRENT LOWEST BID -->
+                    <div class="bid-highlight">
+                        <small>Current Lowest Bid</small>
+                        <h2 id="lowestBid">₹ —</h2>
+                        <small id="lowestBidBy">No bids yet</small>
+                    </div>
+                    <!-- BID INPUT -->
+                    <label>Your Bid Amount (₹)</label><br>
+                    <input type="number" class="bid-input" id="bidAmount"
+                        placeholder="Enter amount less than <?= $poolAmount ?>">
 
-           <div class="content">
-
-    <div class="auction-box">
-
-        <h4>🔨 <?= $auction['group_name'] ?> - Month <?= $auction['auction_month'] ?></h4>
-        <small>Pool Amount: ₹<?= number_format($poolAmount) ?></small>
-
-        <!-- CURRENT LOWEST BID -->
-        <div class="bid-highlight">
-            <small>Current Lowest Bid</small>
-            <h2 id="lowestBid">₹ —</h2>
-            <small id="lowestBidBy">No bids yet</small>
-        </div>
-
-        <!-- BID INPUT -->
-        <label>Your Bid Amount (₹)</label><br>
-        <input type="number"
-               class="bid-input"
-               id="bidAmount"
-               placeholder="Enter amount less than <?= $poolAmount ?>">
-
-        <div class="bid-note">
-            Lower bid amount = Higher discount for all members
-        </div>
-
-        <button class="place-bid-btn" onclick="placeBid()">
-            Place Bid
-        </button>
-
-    </div>
-
-    <br>
-
-    <!-- ALL BIDS -->
-    <div class="auction-box">
-        <b>All Bids</b>
-        <div id="bidList" style="margin-top:10px">
-            <small>No bids placed yet</small>
+                    <div class="bid-note">
+                        Lower bid amount = Higher discount for all members
+                    </div>
+                    <button class="place-bid-btn" onclick="placeBid()">
+                        Place Bid
+                    </button>
+                </div>
+                <br>
+                <!-- ALL BIDS -->
+                <div class="auction-box">
+                    <b>All Bids</b>
+                    <div id="bidList" style="margin-top:10px">
+                        <small>No bids placed yet</small>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-
-</div>
-
-        </div>
-    </div>
-
 </body>
 <script>
 const auctionId = <?= $auctionId ?>;
@@ -149,32 +154,34 @@ function placeBid() {
     }
 
     fetch('ajax/place_bid.php', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-        body: `auction_id=${auctionId}&bid_amount=${amount}`
-    })
-    .then(res => res.json())
-    .then(resp => {
-        if (resp.error) {
-            alert(resp.error);
-        } else {
-            document.getElementById('bidAmount').value = '';
-            loadLowestBid();
-            loadBidList();
-        }
-    });
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: `auction_id=${auctionId}&bid_amount=${amount}`
+        })
+        .then(res => res.json())
+        .then(resp => {
+            if (resp.error) {
+                alert(resp.error);
+            } else {
+                document.getElementById('bidAmount').value = '';
+                loadLowestBid();
+                loadBidList();
+            }
+        });
 }
 
-/* AUTO REFRESH EVERY 5 SECONDS */
-setInterval(() => {
+    /* AUTO REFRESH EVERY 5 SECONDS */
+    setInterval(() => {
+        loadLowestBid();
+        loadBidList();
+        fetch('ajax/close_auction.php');
+    }, 5000);
+
+    /* Initial load */
     loadLowestBid();
     loadBidList();
-    fetch('ajax/close_auction.php');
-}, 5000);
-
-/* Initial load */
-loadLowestBid();
-loadBidList();
 </script>
 
 </html>

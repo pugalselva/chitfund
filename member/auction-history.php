@@ -18,12 +18,15 @@ SELECT
     (
         SELECT COUNT(*) 
         FROM chit_group_members 
-        WHERE chit_group_id = a.chit_group_id
+        WHERE group_id = a.chit_group_id
     ) AS total_members
 FROM auctions a
-JOIN chit_groups cg ON cg.id = a.chit_group_id
-JOIN chit_group_members cgm ON cgm.chit_group_id = a.chit_group_id
-LEFT JOIN members wm ON wm.member_id = a.winner_member_id
+JOIN chit_groups cg 
+    ON cg.id = a.chit_group_id
+JOIN chit_group_members cgm 
+    ON cgm.group_id = a.chit_group_id   -- ✅ FIX HERE
+LEFT JOIN members wm 
+    ON wm.member_id = a.winner_member_id
 WHERE 
     a.status = 'completed'
     AND cgm.member_id = ?
