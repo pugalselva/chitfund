@@ -1,6 +1,7 @@
 <?php
-session_start();
+// session_start();
 include '../../config/database.php';
+include '../auth.php';
 
 if ($_SESSION['role'] !== 'admin') {
     die('Unauthorized');
@@ -36,6 +37,8 @@ $groups = $conn->query("
                     <div class="page-title">Create Auction</div>
                     <div class="page-subtitle">Schedule a new auction for chit group</div>
                 </div>
+                <?php include '../layout/header.php'; ?>
+
             </div>
 
             <div class="content">

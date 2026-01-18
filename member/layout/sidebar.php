@@ -15,8 +15,8 @@ $base = "/statice_design_chitfund/member/";
        class="<?= $currentPage=='my-chits.php'?'active':'' ?>">
         📦 My-Chit
     </a>
-<a href="<?= $base ?>auctions_view.php"
-       class="<?= $currentPage=='live-auction.php'?'active':'' ?>">
+    <a href="<?= $base ?>auctions_view.php"
+       class="<?= $currentPage=='auctions_view.php'?'active':'' ?>">
         🔥 Auction view
     </a>
     <!-- <a href="<?= $base ?>live-auction.php"

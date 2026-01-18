@@ -1,11 +1,8 @@
 <?php
-session_start();
+// session_start();
 include '../../config/database.php';
 
-if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
-    header('Location: ../../index.php');
-    exit();
-}
+include '../auth.php';
 
 if (!isset($_GET['id'])) {
     die('Member ID missing');
@@ -69,71 +66,73 @@ $age = $today->diff($dob)->y;
 
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Member Profile</title>
     <link rel="stylesheet" href="../../assets/css/style.css">
 </head>
 
 <body>
-<div class="wrapper">
-<?php include '../layout/sidebar.php'; ?>
+    <div class="wrapper">
+        <?php include '../layout/sidebar.php'; ?>
 
-<div class="main">
-<div class="topbar">
-    <div>
-        <h2><?= htmlspecialchars($m['full_name']) ?></h2>
-        <small>Member ID: <?= htmlspecialchars($m['member_id']) ?></small>
-    </div>
-</div>
+        <div class="main">
+            <div class="topbar">
+                <div>
+                    <h2><?= htmlspecialchars($m['full_name']) ?></h2>
+                    <small>Member ID: <?= htmlspecialchars($m['member_id']) ?></small>
+                </div>
+            </div>
+            <?php include '../layout/header.php'; ?>
 
-<div class="content">
+            <div class="content">
 
-<div class="tabs">
-    <a href="#" id="tabPersonal" class="active" onclick="showTab('personal')">👤 Personal</a>
-    <a href="#" id="tabBank" onclick="showTab('bank')">🏦 Bank</a>
-    <a href="#" id="tabActivity" onclick="showTab('activity')">📊 Activity</a>
-</div>
+                <div class="tabs">
+                    <a href="#" id="tabPersonal" class="active" onclick="showTab('personal')">👤 Personal</a>
+                    <a href="#" id="tabBank" onclick="showTab('bank')">🏦 Bank</a>
+                    <a href="#" id="tabActivity" onclick="showTab('activity')">📊 Activity</a>
+                </div>
 
-<!-- PERSONAL -->
-<div id="personal" class="tab-content profile-box">
-<h4>Personal Information</h4><br>
-<div class="info-grid">
-    <div>
-        <b>Name</b><br><?= htmlspecialchars($m['full_name']) ?><br><br>
-        <b>DOB</b><br><?= date('d/m/Y', strtotime($m['dob'])) ?><br><br>
-        <b>Address</b><br><?= nl2br(htmlspecialchars($m['address'])) ?>
-    </div>
-    <div>
-        <b>Gender</b><br><?= htmlspecialchars($m['gender']) ?><br><br>
-        <b>Age</b><br><?= $age ?> years<br><br>
-        <b>Mobile</b><br><?= htmlspecialchars($m['mobile']) ?>
-    </div>
-</div>
-</div>
+                <!-- PERSONAL -->
+                <div id="personal" class="tab-content profile-box">
+                    <h4>Personal Information</h4><br>
+                    <div class="info-grid">
+                        <div>
+                            <b>Name</b><br><?= htmlspecialchars($m['full_name']) ?><br><br>
+                            <b>DOB</b><br><?= date('d/m/Y', strtotime($m['dob'])) ?><br><br>
+                            <b>Address</b><br><?= nl2br(htmlspecialchars($m['address'])) ?>
+                        </div>
+                        <div>
+                            <b>Gender</b><br><?= htmlspecialchars($m['gender']) ?><br><br>
+                            <b>Age</b><br><?= $age ?> years<br><br>
+                            <b>Mobile</b><br><?= htmlspecialchars($m['mobile']) ?>
+                        </div>
+                    </div>
+                </div>
 
-<!-- BANK -->
-<div id="bank" class="tab-content profile-box" style="display:none;">
-<h4>Bank Details</h4><br>
+                <!-- BANK -->
+                <div id="bank" class="tab-content profile-box" style="display:none;">
+                    <h4>Bank Details</h4><br>
 
-<?php if (!empty($m['account_no'])): ?>
-<div class="info-grid">
-    <div>
-        <b>Account Holder</b><br><?= htmlspecialchars($m['account_name']) ?><br><br>
-        <b>Account No</b><br><?= htmlspecialchars($m['account_no']) ?><br><br>
-        <b>Bank</b><br><?= htmlspecialchars($m['bank_name']) ?>
-    </div>
-    <div>
-        <b>IFSC</b><br><?= htmlspecialchars($m['ifsc']) ?><br><br>
-        <b>UPI</b><br><?= htmlspecialchars($m['upi_id'] ?: '-') ?>
-    </div>
-</div>
-<?php else: ?>
-<p style="color:#888;">No bank details available</p>
-<?php endif; ?>
-</div>
+                    <?php if (!empty($m['account_no'])): ?>
+                    <div class="info-grid">
+                        <div>
+                            <b>Account Holder</b><br><?= htmlspecialchars($m['account_name']) ?><br><br>
+                            <b>Account No</b><br><?= htmlspecialchars($m['account_no']) ?><br><br>
+                            <b>Bank</b><br><?= htmlspecialchars($m['bank_name']) ?>
+                        </div>
+                        <div>
+                            <b>IFSC</b><br><?= htmlspecialchars($m['ifsc']) ?><br><br>
+                            <b>UPI</b><br><?= htmlspecialchars($m['upi_id'] ?: '-') ?>
+                        </div>
+                    </div>
+                    <?php else: ?>
+                    <p style="color:#888;">No bank details available</p>
+                    <?php endif; ?>
+                </div>
 
-<!-- ACTIVITY -->
-<!-- <div id="activity" class="tab-content profile-box" style="display:none;">
+                <!-- ACTIVITY -->
+                <!-- <div id="activity" class="tab-content profile-box" style="display:none;">
 <h4>Member Activity</h4><br>
 
 <div class="info-grid">
@@ -154,28 +153,29 @@ $age = $today->diff($dob)->y;
 </div>
 </div> -->
 
-<br>
-<span class="badge <?= $m['is_active'] ? 'active' : 'inactive' ?>">
-<?= $m['is_active'] ? 'Active' : 'Inactive' ?>
-</span>
+                <br>
+                <span class="badge <?= $m['is_active'] ? 'active' : 'inactive' ?>">
+                    <?= $m['is_active'] ? 'Active' : 'Inactive' ?>
+                </span>
 
-</div>
-</div>
-</div>
+            </div>
+        </div>
+    </div>
 
-<script>
-function showTab(tab) {
-    ['personal','bank','activity'].forEach(t => {
-        document.getElementById(t).style.display = 'none';
-        document.getElementById('tab'+t.charAt(0).toUpperCase()+t.slice(1))
-            .classList.remove('active');
-    });
+    <script>
+    function showTab(tab) {
+        ['personal', 'bank', 'activity'].forEach(t => {
+            document.getElementById(t).style.display = 'none';
+            document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1))
+                .classList.remove('active');
+        });
 
-    document.getElementById(tab).style.display = 'block';
-    document.getElementById('tab'+tab.charAt(0).toUpperCase()+tab.slice(1))
-        .classList.add('active');
-}
-</script>
+        document.getElementById(tab).style.display = 'block';
+        document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1))
+            .classList.add('active');
+    }
+    </script>
 
 </body>
+
 </html>

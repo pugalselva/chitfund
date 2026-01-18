@@ -1,26 +1,30 @@
 <?php
-session_start();
+include '../auth.php';
 include '../../config/database.php';
 
-if ($_SESSION['role'] !== 'admin') {
-    header("Location: ../../index.php");
-    exit;
-}
+$auctionId = (int)($_GET['auction_id'] ?? 0);
+if (!$auctionId) die('Auction ID missing');
 
-/* Fetch all auctions */
-$auctions = $conn->query("
+/* Auction details */
+$stmt = $conn->prepare("
     SELECT a.*, g.group_name
     FROM auctions a
     JOIN chit_groups g ON g.id = a.chit_group_id
-    ORDER BY a.created_at DESC
+    WHERE a.id = ?
 ");
+$stmt->bind_param("i", $auctionId);
+$stmt->execute();
+$auction = $stmt->get_result()->fetch_assoc();
+
+if (!$auction) die('Auction not found');
 ?>
 <!DOCTYPE html>
 <html>
 <head>
-<title>All Auction Bids</title>
-<link rel="stylesheet" href="../../assets/css/style.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/js/all.min.js"></script>
+    <title>Live Bidding View</title>
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="../../assets/css/style.css">
 </head>
 
 <body>
@@ -30,133 +34,114 @@ $auctions = $conn->query("
 <div class="main">
 <div class="topbar">
     <div>
-        <div class="page-title">Live & Completed Auction Bids</div>
-        <div class="page-subtitle">Real-time bid monitoring</div>
+        <div class="page-title">
+            <?= htmlspecialchars($auction['group_name']) ?> – Month <?= $auction['auction_month'] ?>
+        </div>
+        <div class="page-subtitle">
+            Auction ID #<?= $auctionId ?> · Status: <?= ucfirst($auction['status']) ?>
+        </div>
     </div>
+    <?php include '../layout/header.php'; ?>
 </div>
 
 <div class="content">
 
-<?php while ($a = $auctions->fetch_assoc()): ?>
-
-<?php
-/* Fetch bids for this auction */
-$bids = $conn->query("
-    SELECT b.*, m.full_name
-    FROM auction_bids b
-    JOIN members m ON m.member_id = b.member_id
-    WHERE b.auction_id = {$a['id']}
-    ORDER BY b.bid_amount ASC
-");
-?>
-
-<div class="auction-history-card">
-
-    <!-- HEADER -->
-    <div class="auction-header">
-        <div>
-            <div class="auction-title">
-                <?= htmlspecialchars($a['group_name']) ?> – Month <?= $a['auction_month'] ?>
-            </div>
-            <small>AUC<?= str_pad($a['id'], 3, '0', STR_PAD_LEFT) ?></small>
-        </div>
-
-        <span class="badge <?= $a['status'] ?>">
-            <?= strtoupper($a['status']) ?>
-        </span>
-    </div>
-
-    <!-- LIVE AUCTION -->
-    <?php if ($a['status'] === 'active'): ?>
-
-        <div class="bid-highlight">
-            <small>Current Lowest Bid</small>
-            <h2 id="lowest_<?= $a['id'] ?>">₹ —</h2>
-            <small id="lowestBy_<?= $a['id'] ?>">Waiting for bids…</small>
-        </div>
-
-        <div id="bidList_<?= $a['id'] ?>"></div>
-
-    <?php else: ?>
-
-    <!-- COMPLETED AUCTION -->
-        <div class="auction-note">
-            <b>Winner:</b> <?= htmlspecialchars($a['winner_member_id']) ?><br>
-            <b>Winning Bid:</b> ₹<?= number_format($a['winning_bid_amount']) ?><br>
-            <b>Total Discount:</b>
-            ₹<?= number_format($a['starting_bid_amount'] - $a['winning_bid_amount']) ?>
-        </div>
-
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Member</th>
-                    <th>Bid Amount</th>
-                    <th>Bid Time</th>
-                </tr>
-            </thead>
-            <tbody>
-            <?php while ($b = $bids->fetch_assoc()): ?>
-                <tr <?= $b['bid_amount'] == $a['winning_bid_amount'] ? 'style="background:#f0fdf4"' : '' ?>>
-                    <td><?= htmlspecialchars($b['full_name']) ?></td>
-                    <td>₹<?= number_format($b['bid_amount']) ?></td>
-                    <td><?= date('d/m/Y h:i:s a', strtotime($b['created_at'])) ?></td>
-                </tr>
-            <?php endwhile; ?>
-            </tbody>
-        </table>
-
-    <?php endif; ?>
-
+<!-- CURRENT STATUS -->
+<div class="box">
+    <h3>Current Lowest Bid</h3>
+    <h1 id="lowestBid">₹ —</h1>
+    <small id="lowestBidBy">Waiting for bids</small>
 </div>
 
-<?php endwhile; ?>
+<!-- ALL BIDS -->
+<div class="table-box">
+    <h3>All Bids</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Member</th>
+                <th>Bid Amount</th>
+                <th>Bid Time</th>
+            </tr>
+        </thead>
+        <tbody id="bidTable">
+            <tr><td colspan="3">Loading…</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- WINNER -->
+<div class="box" id="winnerBox" style="display:none;">
+    <h3>🏆 Winning Member</h3>
+    <h2 id="winnerName"></h2>
+    <h3 id="winnerAmount"></h3>
+</div>
 
 </div>
 </div>
 </div>
 
 <script>
-/* ===============================
-   LIVE REFRESH (ADMIN)
-================================ */
-function loadLiveBids(auctionId) {
-    fetch(`ajax/admin_live_bids.php?auction_id=${auctionId}`)
-    .then(r => r.json())
-    .then(data => {
-        if (!data.bids) return;
+const auctionId = <?= $auctionId ?>;
 
-        let html = '';
-        data.bids.forEach((b, i) => {
-            html += `
-                <div style="padding:6px 0">
-                    ${b.full_name}
-                    <span style="float:right">₹${b.bid_amount}</span>
-                </div>`;
+/* Load bids */
+function loadBids() {
+    fetch(`ajax/get_all_bids.php?auction_id=${auctionId}`)
+        .then(r => r.json())
+        .then(bids => {
+            let html = '';
+            if (bids.length === 0) {
+                html = `<tr><td colspan="3">No bids yet</td></tr>`;
+            } else {
+                bids.forEach(b => {
+                    html += `
+                        <tr>
+                            <td>${b.full_name}</td>
+                            <td>₹${b.bid_amount}</td>
+                            <td>${b.created_at}</td>
+                        </tr>`;
+                });
+            }
+            document.getElementById('bidTable').innerHTML = html;
         });
-
-        document.getElementById('bidList_' + auctionId).innerHTML = html;
-
-        if (data.lowest) {
-            document.getElementById('lowest_' + auctionId).innerText =
-                '₹' + data.lowest.bid_amount;
-            document.getElementById('lowestBy_' + auctionId).innerText =
-                'by ' + data.lowest.full_name;
-        }
-    });
 }
 
-/* Auto refresh every 3 sec */
-setInterval(() => {
-<?php
-$auctions->data_seek(0);
-while ($a = $auctions->fetch_assoc()):
-    if ($a['status'] === 'active'):
-?>
-    loadLiveBids(<?= $a['id'] ?>);
-<?php endif; endwhile; ?>
-}, 3000);
-</script>
+/* Lowest bid */
+function loadLowest() {
+    fetch(`ajax/get_lowest_bid.php?auction_id=${auctionId}`)
+        .then(r => r.json())
+        .then(b => {
+            if (b.bid_amount) {
+                lowestBid.innerText = '₹' + b.bid_amount;
+                lowestBidBy.innerText = 'by ' + b.full_name;
+            }
+        });
+}
 
+/* Winner after completion */
+function loadWinner() {
+    fetch(`ajax/get_winner.php?auction_id=${auctionId}`)
+        .then(r => r.json())
+        .then(w => {
+            if (w.full_name) {
+                document.getElementById('winnerBox').style.display = 'block';
+                document.getElementById('winnerName').innerText = w.full_name;
+                document.getElementById('winnerAmount').innerText =
+                    'Winning Bid: ₹' + w.winning_bid_amount;
+            }
+        });
+}
+
+/* Auto refresh */
+setInterval(() => {
+    loadBids();
+    loadLowest();
+    loadWinner();
+}, 4000);
+
+loadBids();
+loadLowest();
+loadWinner();
+</script>
 </body>
 </html>

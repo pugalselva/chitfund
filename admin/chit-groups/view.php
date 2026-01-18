@@ -1,11 +1,8 @@
 <?php
-session_start();
+// session_start();
 include '../../config/database.php';
+include '../auth.php';
 
-if ($_SESSION['role'] !== 'admin') {
-    header('Location: ../../index.php');
-    exit();
-}
 
 $groupId = (int) ($_GET['id'] ?? 0);
 
@@ -273,6 +270,7 @@ $progress = $total > 0 ? round(($completed / $total) * 100) : 0;
                     <div class="page-title"><?= $group['group_name'] ?></div>
                     <div class="page-subtitle">Chit group details and information</div>
                 </div>
+                <?php include '../layout/header.php'; ?>
             </div>
             <a href="../auctions/index.php?group_id=<?= $group['id'] ?>" class="btn btn-primary mb-3">
                 <i class="fa fa-gavel me-1"></i> View Auctions

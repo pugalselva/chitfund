@@ -2,6 +2,14 @@
 session_start();
 include '../config/database.php';
 
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'member') {
+    header('Location: ../index.php');
+    exit();
+}
+
+$name = $_SESSION['name'] ?? 'Member';
+$email = $_SESSION['email'] ?? '';
+
 $memberId = $_SESSION['member_id'];
 
 /* Get completed auctions where member belongs to group */
@@ -49,6 +57,7 @@ $result = $stmt->get_result();
 
 <head>
     <title>Auction History</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="../assets/css/style.css">
 </head>
 
@@ -66,9 +75,14 @@ $result = $stmt->get_result();
                         View past auction results and your share of discounts
                     </div>
                 </div>
+
                 <div style="text-align:right;">
-                    <b>Member User</b><br>
-                    sandy@gmail.com
+                    <b><?= htmlspecialchars($name) ?></b><br>
+                    <small><?= htmlspecialchars($email) ?></small><br>
+
+                    <a href="../logout.php" class="btn btn-danger" style="margin-top:6px;">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </a>
                 </div>
             </div>
 

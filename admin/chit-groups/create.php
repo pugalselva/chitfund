@@ -1,3 +1,6 @@
+<?php
+include '../auth.php';
+?>
 <!DOCTYPE html>
 <html>
 
@@ -20,6 +23,8 @@
                     <div class="page-title">Create Chit Group</div>
                     <div class="page-subtitle">Set up a new chit fund group</div>
                 </div>
+                <?php include '../layout/header.php'; ?>
+
             </div>
 
             <div class="content container-fluid">

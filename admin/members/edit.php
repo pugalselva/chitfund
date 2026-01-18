@@ -1,11 +1,7 @@
 <?php
-session_start();
 include '../../config/database.php';
 
-if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
-    header('Location: ../../index.php');
-    exit();
-}
+include '../auth.php';
 
 if (!isset($_GET['id'])) {
     die('Member ID missing');
@@ -67,6 +63,7 @@ $m = $result->fetch_assoc();
                     <div class="page-title">Edit Member</div>
                     <div class="page-subtitle">Update member details</div>
                 </div>
+                <?php include '../layout/header.php'; ?>
             </div>
 
             <div class="content">

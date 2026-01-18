@@ -1,3 +1,6 @@
+<?php
+include '../auth.php';
+?>
 <!DOCTYPE html>
 <html>
 
@@ -18,7 +21,9 @@
                 <div>
                     <div class="page-title">Member Enrollment</div>
                     <div class="page-subtitle">Register a new member with complete details</div>
+                    
                 </div>
+                <?php include '../layout/header.php'; ?>
             </div>
 
             <div class="content">

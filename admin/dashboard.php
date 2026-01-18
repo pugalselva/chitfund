@@ -1,9 +1,9 @@
 <?php
-// session_start();
-// if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
-//     header("Location: ../index.php");
-//     exit;
-// }
+include 'auth.php';
+
+?>
+<?php
+$pageTitle = "Dashboard";
 ?>
 <!DOCTYPE html>
 <html>
@@ -20,18 +20,15 @@
         <?php include 'layout/sidebar.php'; ?>
 
         <div class="main">
-
             <div class="topbar">
-                <h3>Dashboard</h3>
                 <div>
-                    <b>Admin User</b><br>
-                    sandy@gmail.com
-                    <a href="../logout.php" class="btn btn-danger">
-                        <i class="fas fa-sign-out-alt"></i>
-                    </a>
+                    <div class="page-title">Dashboard</div>
                 </div>
 
+                <?php include 'layout/header.php'; ?>
             </div>
+
+
 
             <div class="content">
                 <p style="color:#6b7280;">Welcome back! Here's your overview.</p>

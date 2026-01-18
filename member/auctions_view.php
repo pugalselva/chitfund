@@ -2,10 +2,13 @@
 session_start();
 include '../config/database.php';
 
-if ($_SESSION['role'] !== 'member') {
-    header("Location: ../index.php");
-    exit;
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'member') {
+    header('Location: ../index.php');
+    exit();
 }
+
+$name = $_SESSION['name'] ?? 'Member';
+$email = $_SESSION['email'] ?? '';
 
 $memberId = $_SESSION['member_id'];
 
@@ -34,6 +37,8 @@ $result = $stmt->get_result();
 
 <head>
     <title>My Auctions</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
     <link rel="stylesheet" href="../assets/css/style.css">
 </head>
 
@@ -41,12 +46,20 @@ $result = $stmt->get_result();
 
     <div class="wrapper">
         <?php include 'layout/sidebar.php'; ?>
-
         <div class="main">
             <div class="topbar">
                 <div>
                     <div class="page-title">My Auctions</div>
                     <div class="page-subtitle">Upcoming & Live auctions</div>
+                </div>
+
+                <div style="text-align:right;">
+                    <b><?= htmlspecialchars($name) ?></b><br>
+                    <small><?= htmlspecialchars($email) ?></small><br>
+
+                    <a href="../logout.php" class="btn btn-danger" style="margin-top:6px;">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </a>
                 </div>
             </div>
 
@@ -78,13 +91,11 @@ $result = $stmt->get_result();
                                 <td><?= date('d M Y H:i', strtotime($a['auction_end_datetime'])) ?></td>
 
                                 <td class="countdown">—</td>
-
                                 <td>
                                     <span class="badge <?= $a['status'] ?>">
                                         <?= ucfirst($a['status']) ?>
                                     </span>
                                 </td>
-
                                 <td>
                                     <?php if ($a['status'] === 'active'): ?>
                                     <a href="live-auction.php?auction_id=<?= $a['id'] ?>" class="btn-primary">
@@ -94,17 +105,16 @@ $result = $stmt->get_result();
                                     <small>Waiting</small>
                                     <?php endif; ?>
                                 </td>
-
                             </tr>
                             <?php endwhile; ?>
                         </tbody>
                     </table>
-
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Script -->
     <script>
     /* Countdown Timer */
     setInterval(() => {

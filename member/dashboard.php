@@ -1,11 +1,14 @@
 <?php
 session_start();
+
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'member') {
     header('Location: ../index.php');
     exit();
 }
-?>
 
+$name  = $_SESSION['name']  ?? 'Member';
+$email = $_SESSION['email'] ?? '';
+?>
 
 <!DOCTYPE html>
 <html>
@@ -19,30 +22,27 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'member') {
 <body>
 
     <div class="wrapper">
-
         <?php include 'layout/sidebar.php'; ?>
-
         <div class="main">
-
             <div class="topbar">
                 <div>
                     <div class="page-title">Member Dashboard</div>
-                    <div class="page-subtitle">Welcome back! Here's your overview.</div>
-                </div>
-                <div class="topbar">
-                    <div>
-                        <b>Member User</b><br>
-                        sandy@gmail.com
-                        <a href="../logout.php" class="btn btn-danger">
-                            <i class="fas fa-sign-out-alt"></i>
-                        </a>
+                    <div class="page-subtitle">
+                        Welcome back, <?= htmlspecialchars($name) ?>!
                     </div>
+                </div>
 
+                <div style="text-align:right;">
+                    <b><?= htmlspecialchars($name) ?></b><br>
+                    <small><?= htmlspecialchars($email) ?></small><br>
+
+                    <a href="../logout.php" class="btn btn-danger" style="margin-top:6px;">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </a>
                 </div>
             </div>
 
             <div class="content">
-
                 <!-- TOP CARDS -->
                 <div class="cards">
                     <div class="card">
@@ -122,11 +122,8 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'member') {
                                 <small style="color:#ea580c;">pending</small>
                             </div>
                         </div>
-
                     </div>
-
                 </div>
-
             </div>
         </div>
     </div>

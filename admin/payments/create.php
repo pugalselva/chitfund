@@ -1,6 +1,8 @@
 <?php
-session_start();
+// session_start();
 include '../../config/database.php';
+include '../auth.php';
+
 
 if ($_SESSION['role'] !== 'admin') {
     die('Unauthorized');
@@ -40,6 +42,7 @@ $groups = $conn->query("
                     <div class="page-title">Payment Entry</div>
                     <div class="page-subtitle">Record a member's monthly contribution payment</div>
                 </div>
+                <?php include '../layout/header.php'; ?>
             </div>
 
             <div class="content">

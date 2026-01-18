@@ -1,5 +1,6 @@
 <?php
 include '../../config/database.php';
+include '../auth.php';
 
 $payments = $conn->query("
     SELECT p.*, 
@@ -38,6 +39,22 @@ $summary = $conn
     <title>Payment Reports</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="../../assets/css/style.css">
+    <style>
+    .pagination button {
+        padding: 6px 10px;
+        margin: 0 3px;
+        border: 1px solid #ddd;
+        background: #fff;
+        cursor: pointer;
+        border-radius: 6px;
+    }
+
+    .pagination button.active {
+        background: #2563eb;
+        color: #fff;
+        border-color: #2563eb;
+    }
+    </style>
 </head>
 
 <body>
@@ -51,17 +68,9 @@ $summary = $conn
                 <div>
                     <div class="page-title">Payment Reports</div>
                     <div class="page-subtitle">Track all payment transactions</div>
-                </div>
-                <div class="topbar">
-                    <div>
-                        <b>Admin User</b><br>
-                        sandy@gmail.com
-                        <a href="../../logout.php" class="btn btn-danger">
-                            <i class="fas fa-sign-out-alt"></i>
-                        </a>
-                    </div>
 
                 </div>
+                <?php include '../layout/header.php'; ?>
             </div>
 
             <div class="content">
@@ -103,8 +112,35 @@ $summary = $conn
                             (<?= $summary['overdue_count'] ?>)</span>
 
                     </div>
+                    <div class="table-controls" style="display:flex;gap:10px;align-items:center;margin-bottom:12px;">
+                        <select id="groupFilter" class="form-control">
+                            <option value="">All Groups</option>
+                            <?php
+                            $groups = $conn->query("SELECT DISTINCT group_name FROM chit_groups ORDER BY group_name");
+                            while ($g = $groups->fetch_assoc()):
+                            ?>
+                            <option value="<?= htmlspecialchars($g['group_name']) ?>">
+                                <?= htmlspecialchars($g['group_name']) ?>
+                            </option>
+                            <?php endwhile; ?>
+                        </select>
 
-                    <table>
+                        <select id="memberFilter" class="form-control">
+                            <option value="">All Members</option>
+                            <?php
+                            $members = $conn->query("SELECT DISTINCT full_name FROM members ORDER BY full_name");
+                            while ($m = $members->fetch_assoc()):
+                            ?>
+                            <option value="<?= htmlspecialchars($m['full_name']) ?>">
+                                <?= htmlspecialchars($m['full_name']) ?>
+                            </option>
+                            <?php endwhile; ?>
+                        </select>
+
+                        <input type="text" id="searchBox" class="form-control" placeholder="Search..." />
+                    </div>
+
+                    <table class="table">
                         <thead>
                             <tr>
                                 <th>Receipt</th>
@@ -120,7 +156,7 @@ $summary = $conn
                             </tr>
                         </thead>
 
-                        <tbody>
+                        <tbody id="paymentTableBody">
                             <?php while($p = $payments->fetch_assoc()): ?>
                             <tr data-status="<?= $p['status'] ?>">
                                 <td><?= $p['receipt_no'] ?></td>
@@ -140,16 +176,27 @@ $summary = $conn
                                     Export Excel
                                 </a> -->
                                 <td>
-    <button class="btn-secondary"
-        onclick="openInvoice('<?= $p['receipt_no'] ?>')">
-        <i class="fa fa-file-invoice"></i> Invoice
-    </button>
-</td>
+                                    <button class="btn-secondary" onclick="openInvoice('<?= $p['receipt_no'] ?>')">
+                                        <i class="fa fa-file-invoice"></i> Invoice
+                                    </button>
+                                </td>
 
                             </tr>
                             <?php endwhile; ?>
                         </tbody>
                     </table>
+                    <div class="pagination-wrapper"
+                        style="margin-top: 10px; display: flex; align-items: center; justify-content: flex-end;">
+                        <div class="pagination" id="pagination" style="margin-right: 100px;"></div>
+                        <label for="" style="margin-top: 4px; margin-right: 10px; color: #333; font-weight: bold;">Show
+                            per page </label>
+                        <select id="perPage"
+                            style="margin-left: 10px; padding: 4px 8px; border-radius: 4px; border: 0.5px solid #ccc; font-size: 14px;">
+                            <option value="5">5</option>
+                            <option value="10">10</option>
+                            <option value="25">25</option>
+                        </select>
+                    </div>
                 </div>
             </div>
         </div>
@@ -159,49 +206,186 @@ $summary = $conn
 
 </html>
 <script>
-    function filterPayments(status, el) {
-        // remove active class from all tabs
-        document.querySelectorAll('.tabs span').forEach(tab => {
-            tab.classList.remove('active');
-        });
+function filterPayments(status, el) {
+    // remove active class from all tabs
+    document.querySelectorAll('.tabs span').forEach(tab => {
+        tab.classList.remove('active');
+    });
 
-        // add active to clicked tab
-        el.classList.add('active');
+    // add active to clicked tab
+    el.classList.add('active');
 
-        // filter rows
-        document.querySelectorAll('tbody tr').forEach(row => {
-            if (status === 'all' || row.dataset.status === status) {
-                row.style.display = '';
-            } else {
-                row.style.display = 'none';
-            }
-        });
-    }
-</script>
-<script>
-    function filterPayments(status, el) {
-
-        // highlight active tab
-        document.querySelectorAll('.tabs span').forEach(tab => {
-            tab.classList.remove('active');
-        });
-        el.classList.add('active');
-
-        // filter table rows
-        document.querySelectorAll('tbody tr').forEach(row => {
-            const rowStatus = row.getAttribute('data-status');
-
-            if (status === 'all' || rowStatus === status) {
-                row.style.display = '';
-            } else {
-                row.style.display = 'none';
-            }
-        });
-    }
-</script>
-<script>
-function openInvoice(receipt){
-    window.open('invoice.php?receipt='+receipt,'_blank');
+    // filter rows
+    document.querySelectorAll('tbody tr').forEach(row => {
+        if (status === 'all' || row.dataset.status === status) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
 }
 </script>
+<script>
+function filterPayments(status, el) {
 
+    // highlight active tab
+    document.querySelectorAll('.tabs span').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    el.classList.add('active');
+
+    // filter table rows
+    document.querySelectorAll('tbody tr').forEach(row => {
+        const rowStatus = row.getAttribute('data-status');
+
+        if (status === 'all' || rowStatus === status) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+}
+</script>
+<script>
+function openInvoice(receipt) {
+    window.open('invoice.php?receipt=' + receipt, '_blank');
+}
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    const tbody = document.getElementById('paymentTableBody');
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+
+    const searchBox = document.getElementById('searchBox');
+    const groupDrop = document.getElementById('groupFilter');
+    const memberDrop = document.getElementById('memberFilter');
+    const perPageEl = document.getElementById('perPage');
+    const pagination = document.getElementById('pagination');
+
+    let currentPage = 1;
+
+    /* 🔐 Restore page size */
+    let perPage = localStorage.getItem('payments_per_page') || perPageEl.value;
+    perPageEl.value = perPage;
+
+    function getFilteredRows() {
+        const search = searchBox.value.toLowerCase();
+        const group = groupDrop.value.toLowerCase();
+        const member = memberDrop.value.toLowerCase();
+
+        return rows.filter(row => {
+            const text = row.innerText.toLowerCase();
+            const groupName = row.children[2].innerText.toLowerCase(); // Group column
+            const memberNm = row.children[1].innerText.toLowerCase(); // Member column
+
+            return (
+                text.includes(search) &&
+                (!group || groupName.includes(group)) &&
+                (!member || memberNm.includes(member))
+            );
+        });
+    }
+
+    function renderTable() {
+        const filtered = getFilteredRows();
+        const totalPages = Math.ceil(filtered.length / perPage) || 1;
+
+        currentPage = Math.min(currentPage, totalPages);
+
+        rows.forEach(r => r.style.display = 'none');
+
+        filtered
+            .slice((currentPage - 1) * perPage, currentPage * perPage)
+            .forEach(r => r.style.display = '');
+
+        renderPagination(totalPages);
+    }
+
+    function renderPagination(totalPages) {
+    pagination.innerHTML = '';
+
+    const createBtn = (label, page, active = false, disabled = false) => {
+        const btn = document.createElement('button');
+        btn.textContent = label;
+
+        if (active) btn.classList.add('active');
+        if (disabled) btn.disabled = true;
+
+        btn.onclick = () => {
+            if (!disabled) {
+                currentPage = page;
+                renderTable();
+            }
+        };
+        return btn;
+    };
+
+    /* PREV */
+    if (currentPage > 1) {
+        pagination.appendChild(createBtn('‹ Prev', currentPage - 1));
+    }
+
+    const range = 1; // pages around current
+    let start = Math.max(2, currentPage - range);
+    let end   = Math.min(totalPages - 1, currentPage + range);
+
+    /* FIRST PAGE */
+    pagination.appendChild(createBtn(1, 1, currentPage === 1));
+
+    /* LEFT ELLIPSIS */
+    if (start > 2) {
+        pagination.appendChild(createBtn('…', 0, false, true));
+    }
+
+    /* MIDDLE PAGES */
+    for (let i = start; i <= end; i++) {
+        pagination.appendChild(createBtn(i, i, i === currentPage));
+    }
+
+    /* RIGHT ELLIPSIS */
+    if (end < totalPages - 1) {
+        pagination.appendChild(createBtn('…', 0, false, true));
+    }
+
+    /* LAST PAGE */
+    if (totalPages > 1) {
+        pagination.appendChild(
+            createBtn(totalPages, totalPages, currentPage === totalPages)
+        );
+    }
+
+    /* NEXT */
+    if (currentPage < totalPages) {
+        pagination.appendChild(createBtn('Next ›', currentPage + 1));
+    }
+}
+
+
+
+    /* EVENTS */
+    perPageEl.onchange = () => {
+        perPage = perPageEl.value;
+        localStorage.setItem('payments_per_page', perPage);
+        currentPage = 1;
+        renderTable();
+    };
+
+    searchBox.onkeyup = () => {
+        currentPage = 1;
+        renderTable();
+    };
+
+    groupDrop.onchange = () => {
+        currentPage = 1;
+        renderTable();
+    };
+
+    memberDrop.onchange = () => {
+        currentPage = 1;
+        renderTable();
+    };
+
+    renderTable(); // init
+});
+</script>

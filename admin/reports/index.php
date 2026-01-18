@@ -1,11 +1,12 @@
 <?php
-session_start();
+// session_start();
 include '../../config/database.php';
+include '../auth.php';
 
-if ($_SESSION['role'] !== 'admin') {
-    header('Location: ../../index.php');
-    exit();
-}
+// if ($_SESSION['role'] !== 'admin') {
+//     header('Location: ../../index.php');
+//     exit();
+// }
 
 /* ---- PAYMENTS SUMMARY ---- */
 $paymentSummary = $conn
@@ -82,17 +83,9 @@ $completedAuctions = $conn
                 <div>
                     <div class="page-title">Reports</div>
                     <div class="page-subtitle">Generate and download comprehensive reports</div>
+                    
                 </div>
-                <div class="topbar">
-                    <div>
-                        <b>Admin User</b><br>
-                        sandy@gmail.com
-                        <a href="../../logout.php" class="btn btn-danger">
-                            <i class="fas fa-sign-out-alt"></i>
-                        </a>
-                    </div>
-
-                </div>
+                <?php include '../layout/header.php'; ?>
             </div>
 
             <div class="content">

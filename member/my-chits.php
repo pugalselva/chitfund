@@ -2,10 +2,13 @@
 session_start();
 include '../config/database.php';
 
-if ($_SESSION['role'] !== 'member') {
-    header("Location: ../index.php");
-    exit;
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'member') {
+    header('Location: ../index.php');
+    exit();
 }
+
+$name = $_SESSION['name'] ?? 'Member';
+$email = $_SESSION['email'] ?? '';
 
 $memberId = $_SESSION['member_id'];
 
@@ -44,14 +47,20 @@ $result = $stmt->get_result();
 
         <div class="main">
 
+            
             <div class="topbar">
-                <div>
+               <div>
                     <div class="page-title">My Chit Groups</div>
                     <div class="page-subtitle">View and manage your chit memberships</div>
                 </div>
-                <div style="text-align:right">
-                    <b>Member User</b><br>
-                    <?= htmlspecialchars($_SESSION['email'] ?? '') ?>
+
+                <div style="text-align:right;">
+                    <b><?= htmlspecialchars($name) ?></b><br>
+                    <small><?= htmlspecialchars($email) ?></small><br>
+
+                    <a href="../logout.php" class="btn btn-danger" style="margin-top:6px;">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </a>
                 </div>
             </div>
 

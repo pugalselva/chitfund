@@ -1,12 +1,12 @@
 <?php
-session_start();
+// session_start();
 include '../../config/database.php';
+include '../auth.php';
 
-if ($_SESSION['role'] !== 'admin') {
-    header("Location: ../../index.php");
-    exit;
-}
-
+// if ($_SESSION['role'] !== 'admin') {
+//     header("Location: ../../index.php");
+//     exit;
+// }
 $settings = $conn->query("SELECT * FROM settings ORDER BY id ASC");
 ?>
 
@@ -29,17 +29,9 @@ $settings = $conn->query("SELECT * FROM settings ORDER BY id ASC");
     <div>
         <div class="page-title">Settings</div>
         <div class="page-subtitle">Configure system settings and preferences</div>
+        
     </div>
-    <div class="topbar">
-                <div>
-                    <b>Admin User</b><br>
-                    sandy@gmail.com
-                    <a href="../../logout.php" class="btn btn-danger">
-                        <i class="fas fa-sign-out-alt"></i>
-                    </a>
-                </div>
-
-            </div>
+    <?php include '../layout/header.php'; ?>
 </div>
 
 <div class="content">

@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -121,9 +120,7 @@
             cursor: pointer;
         }
     </style>
-
 </head>
-
 <body>
     <div class="login-card">
         <h2>Chit Fund System</h2>
@@ -132,7 +129,7 @@
         <!-- ROLE SWITCH -->
         <div class="role-switch">
             <button id="adminBtn" class="active">Admin</button>
-            <button id="memberBtn">Member</button>
+            <button id="memberBtn">Member</button>c
         </div>
 
         <form id="loginForm">
@@ -158,7 +155,7 @@
             </button>
         </form>
     </div>
-
+<!-- Script -->
     <script src="assets/js/script.js"></script>
     <script>
         document.getElementById('loginForm').addEventListener('submit', function(e) {
@@ -193,7 +190,5 @@
                 });
         });
     </script>
-
 </body>
-
 </html>
