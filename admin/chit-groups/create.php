@@ -47,10 +47,6 @@ include '../auth.php';
                                         <input type="number" name="duration" class="form-control" required>
                                     </div>
                                 </div>
-                                <!-- <div class="form-group">
-                                    <label>Monthly Contribution (₹) *</label>
-                                    <input type="number" name="monthly_installment" class="form-control" required>
-                                </div> -->
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label>Auction Type *</label>
@@ -60,10 +56,6 @@ include '../auth.php';
                                             <option value="Open">Open Auction</option>
                                         </select>
                                     </div>
-                                    <!-- <div class="form-group">
-                                <label>Foreman Commission (%) *</label>
-                                <input type="number" name="commission" class="form-control" required>
-                            </div> -->
                                 </div>
                                 <div class="form-group">
                                     <label>Start Date *</label>
@@ -83,7 +75,7 @@ include '../auth.php';
                                 </div>
                                 <br>
                                 <button class="btn-primary" type="submit">Create Group</button>
-
+                                
                                 <a href="index.php">
                                     <button type="button" class="btn-secondary">Cancel</button>
                                 </a>
@@ -101,8 +93,8 @@ include '../auth.php';
             <i class="fas fa-times"></i>
         </button>
     </div>
-
-<!-- script -->
+    
+    <!-- script -->
     <script>
         document.getElementById('createGroupForm').addEventListener('submit', function(e) {
             e.preventDefault();
@@ -127,3 +119,12 @@ include '../auth.php';
 </body>
 
 </html>
+
+<!-- <div class="form-group">
+    <label>Monthly Contribution (₹) *</label>
+    <input type="number" name="monthly_installment" class="form-control" required>
+</div> -->
+<!-- <div class="form-group">
+<label>Foreman Commission (%) *</label>
+<input type="number" name="commission" class="form-control" required>
+</div> -->

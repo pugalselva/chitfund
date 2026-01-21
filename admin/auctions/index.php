@@ -1,5 +1,6 @@
 <?php
 // session_start();
+
 include '../../config/database.php';
 include 'auto-close.php';
 include 'auto-status.php';
@@ -10,12 +11,19 @@ include '../auth.php';
 //     exit;
 // }
 
+// $auctions = $conn->query("
+//     SELECT a.*, g.group_name
+//     FROM auctions a
+//     JOIN chit_groups g ON g.id = a.chit_group_id
+//     ORDER BY a.created_at DESC
+// ");
 $auctions = $conn->query("
-    SELECT a.*, g.group_name
+    SELECT a.*, g.group_name, g.auction_type
     FROM auctions a
     JOIN chit_groups g ON g.id = a.chit_group_id
     ORDER BY a.created_at DESC
 ");
+
 ?>
 
 
@@ -63,7 +71,7 @@ $auctions = $conn->query("
             <div class="content">
 
                 <a href="create.php"><button class="btn-primary">＋ Create Auction</button></a>
-                <a href="all_bidding_view.php"><button class="btn-primary">Live Auction</button></a>
+                <!-- <a href="kulukkal_spin.php"><button class="btn-primary">kulukal</button></a> -->
 
                 <div class="table-box">
                     <!-- <h3>All Groups (<?= $count ?>)</h3> -->
@@ -118,7 +126,15 @@ $auctions = $conn->query("
                                     <a href="all_bidding_view.php?auction_id=<?= $a['id'] ?>">
                                         <button class="btn-primary">Live View</button>
                                     </a>
-
+                                    
+                                    <!-- <a href="kulukkal_spin.php?auction_id=<?= $a['id'] ?>">
+                                        <button class="btn-primary">Kulukkal</button>
+                                    </a> -->
+                                    <?php if ($a['auction_type'] === 'Open' && $a['status'] !== 'completed'): ?>
+                                            <a href="kulukkal_spin.php?auction_id=<?= $a['id'] ?>">
+                                                <button class="btn-primary">🎰 Kulukkal</button>
+                                            </a>
+                                        <?php endif; ?>
                                 </td>
                             </tr>
                             <?php endwhile; ?>

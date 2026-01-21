@@ -41,3 +41,4 @@ VALUES ($auction_id, '$member_id', $bid_amount)
 ");
 
 echo json_encode(['success' => true]);
+?>

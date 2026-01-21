@@ -69,3 +69,4 @@ if ($stmt->execute()) {
 } else {
     echo 'Database error';
 }
+?>

@@ -148,8 +148,6 @@
                 </div>
             </div>
 
-            <div class="demo">Demo password: demo</div>
-
             <button type="submit" class="login-btn" id="loginBtn">
                 Login as Admin
             </button>

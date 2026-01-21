@@ -11,6 +11,8 @@ $startTime = $_POST['auction_datetime'];
 $endTime   = $_POST['auction_end_datetime'];
 $startBid  = (int)$_POST['starting_bid_amount'];
 $status    = $_POST['status'];
+$auctionType = $_POST['auction_type']; // fetched automatically
+
 
 /* ❌ Invalid time protection */
 if (strtotime($endTime) <= strtotime($startTime)) {
@@ -36,14 +38,19 @@ $stmt = $conn->prepare("
     SELECT IFNULL(MAX(auction_month),0)+1 AS next_month
     FROM auctions
     WHERE chit_group_id=?
+    AND status != 'cancelled'
 ");
 $stmt->bind_param("i", $groupId);
 $stmt->execute();
+
 $month = (int)$stmt->get_result()->fetch_assoc()['next_month'];
 
 /* ❌ Prevent exceeding duration */
-if ($month > $group['duration_months']) {
-    die('Auction months exceed group duration');
+if ($month > (int)$group['duration_months']) {
+    die(
+        "Cannot create auction. 
+         Maximum {$group['duration_months']} months already scheduled."
+    );
 }
 
 /* ✅ INSERT AUCTION */
@@ -69,3 +76,5 @@ $stmt->execute();
 
 header("Location: index.php?success=1");
 exit;
+
+?>

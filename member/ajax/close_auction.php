@@ -39,3 +39,4 @@ while ($a = $q->fetch_assoc()) {
         ");
     }
 }
+?>

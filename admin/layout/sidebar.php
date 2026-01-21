@@ -1,6 +1,6 @@
 <?php
 $currentPage = basename($_SERVER['PHP_SELF']);
-$base = "/statice_design_chitfund/admin/";
+$base = "/statice_design_chitfund_random/admin/";
 ?>
 
 <div class="sidebar">

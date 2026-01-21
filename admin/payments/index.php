@@ -10,7 +10,7 @@ $payments = $conn->query("
     JOIN members m ON m.member_id = p.member_id
     JOIN chit_groups g ON g.id = p.chit_group_id
     ORDER BY p.created_at DESC
-");
+");    
 // summary data can be calculated here or in the HTML section
 $summary = $conn
     ->query(
@@ -30,7 +30,6 @@ $summary = $conn
     ->fetch_assoc();
 
 ?>
-
 
 <!DOCTYPE html>
 <html>
@@ -100,7 +99,6 @@ $summary = $conn
                     <button class="btn-primary">＋ Record Payment</button>
                 </a>
                 <div class="table-box">
-
                     <div class="tabs">
                         <span class="active" onclick="filterPayments('all', this)">
                             All (<?= $summary['paid_count'] + $summary['pending_count'] + $summary['overdue_count'] ?>)
@@ -110,7 +108,6 @@ $summary = $conn
                             (<?= $summary['pending_count'] ?>)</span>
                         <span onclick="filterPayments('overdue', this)">Overdue
                             (<?= $summary['overdue_count'] ?>)</span>
-
                     </div>
                     <div class="table-controls" style="display:flex;gap:10px;align-items:center;margin-bottom:12px;">
                         <select id="groupFilter" class="form-control">
@@ -166,12 +163,18 @@ $summary = $conn
                                 <td>₹<?= $p['actual_amount'] ?></td>
                                 <td>-₹<?= $p['discount_amount'] ?></td>
                                 <td>₹<?= $p['final_amount'] ?></td>
-                                <td><?= $p['payment_mode'] ?></td>
+                                <td>
+                                    <span class="badge <?= $p['payment_mode'] ?>">
+                                        <?= ucfirst($p['payment_mode']) ?>
+                                    </span>
+                                </td>
+
                                 <td>
                                     <span class="badge <?= $p['status'] ?>">
                                         <?= ucfirst($p['status']) ?>
                                     </span>
                                 </td>
+
                                 <!-- <td><a href="export_excel.php" class="btn-secondary">
                                     Export Excel
                                 </a> -->
@@ -186,12 +189,14 @@ $summary = $conn
                         </tbody>
                     </table>
                     <div class="pagination-wrapper"
-                        style="margin-top: 10px; display: flex; align-items: center; justify-content: flex-end;">
+                        style="margin-top: 10px;display:flex;align-items:center;justify-content:flex-end;">
                         <div class="pagination" id="pagination" style="margin-right: 100px;"></div>
-                        <label for="" style="margin-top: 4px; margin-right: 10px; color: #333; font-weight: bold;">Show
+                        <label for=""
+                            style="margin-top: 4px; margin-right: 10px; color: #333; font-weight: bold;">Show
                             per page </label>
                         <select id="perPage"
                             style="margin-left: 10px; padding: 4px 8px; border-radius: 4px; border: 0.5px solid #ccc; font-size: 14px;">
+
                             <option value="5">5</option>
                             <option value="10">10</option>
                             <option value="25">25</option>
@@ -228,24 +233,19 @@ function filterPayments(status, el) {
 <script>
 function filterPayments(status, el) {
 
-    // highlight active tab
+    activeStatusFilter = status;   // ✅ STORE FILTER
+
     document.querySelectorAll('.tabs span').forEach(tab => {
         tab.classList.remove('active');
     });
     el.classList.add('active');
 
-    // filter table rows
-    document.querySelectorAll('tbody tr').forEach(row => {
-        const rowStatus = row.getAttribute('data-status');
-
-        if (status === 'all' || rowStatus === status) {
-            row.style.display = '';
-        } else {
-            row.style.display = 'none';
-        }
-    });
+    currentPage = 1;               // ✅ RESET PAGE
+    renderTable();                 // ✅ RE-RENDER
 }
 </script>
+
+
 <script>
 function openInvoice(receipt) {
     window.open('invoice.php?receipt=' + receipt, '_blank');
@@ -270,22 +270,16 @@ document.addEventListener('DOMContentLoaded', () => {
     perPageEl.value = perPage;
 
     function getFilteredRows() {
-        const search = searchBox.value.toLowerCase();
-        const group = groupDrop.value.toLowerCase();
-        const member = memberDrop.value.toLowerCase();
+                const search = searchBox.value.toLowerCase();
+                const group = groupDrop.value.toLowerCase();
 
-        return rows.filter(row => {
-            const text = row.innerText.toLowerCase();
-            const groupName = row.children[2].innerText.toLowerCase(); // Group column
-            const memberNm = row.children[1].innerText.toLowerCase(); // Member column
+                return rows.filter(row => {
+                    const text = row.innerText.toLowerCase();
+                    const groupName = row.children[0].innerText.toLowerCase(); // Group column
+                    return text.includes(search) && (!group || groupName.includes(group));
+                });
+            }
 
-            return (
-                text.includes(search) &&
-                (!group || groupName.includes(group)) &&
-                (!member || memberNm.includes(member))
-            );
-        });
-    }
 
     function renderTable() {
         const filtered = getFilteredRows();
@@ -303,89 +297,84 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderPagination(totalPages) {
-    pagination.innerHTML = '';
+                pagination.innerHTML = '';
 
-    const createBtn = (label, page, active = false, disabled = false) => {
-        const btn = document.createElement('button');
-        btn.textContent = label;
+                const createBtn = (label, page, active = false, disabled = false) => {
+                    const btn = document.createElement('button');
+                    btn.textContent = label;
 
-        if (active) btn.classList.add('active');
-        if (disabled) btn.disabled = true;
+                    if (active) btn.classList.add('active');
+                    if (disabled) btn.disabled = true;
 
-        btn.onclick = () => {
-            if (!disabled) {
-                currentPage = page;
-                renderTable();
+                    btn.onclick = () => {
+                        if (!disabled) {
+                            currentPage = page;
+                            renderTable();
+                        }
+                    };
+                    return btn;
+                };
+
+                /* PREV */
+                if (currentPage > 1) {
+                    pagination.appendChild(createBtn('‹ Prev', currentPage - 1));
+                }
+
+                const range = 1; // pages around current
+                let start = Math.max(2, currentPage - range);
+                let end = Math.min(totalPages - 1, currentPage + range);
+
+                /* FIRST PAGE */
+                pagination.appendChild(createBtn(1, 1, currentPage === 1));
+
+                /* LEFT ELLIPSIS */
+                if (start > 2) {
+                    pagination.appendChild(createBtn('…', 0, false, true));
+                }
+
+                /* MIDDLE PAGES */
+                for (let i = start; i <= end; i++) {
+                    pagination.appendChild(createBtn(i, i, i === currentPage));
+                }
+
+                /* RIGHT ELLIPSIS */
+                if (end < totalPages - 1) {
+                    pagination.appendChild(createBtn('…', 0, false, true));
+                }
+
+                /* LAST PAGE */
+                if (totalPages > 1) {
+                    pagination.appendChild(
+                        createBtn(totalPages, totalPages, currentPage === totalPages)
+                    );
+                }
+
+                /* NEXT */
+                if (currentPage < totalPages) {
+                    pagination.appendChild(createBtn('Next ›', currentPage + 1));
+                }
             }
-        };
-        return btn;
-    };
-
-    /* PREV */
-    if (currentPage > 1) {
-        pagination.appendChild(createBtn('‹ Prev', currentPage - 1));
-    }
-
-    const range = 1; // pages around current
-    let start = Math.max(2, currentPage - range);
-    let end   = Math.min(totalPages - 1, currentPage + range);
-
-    /* FIRST PAGE */
-    pagination.appendChild(createBtn(1, 1, currentPage === 1));
-
-    /* LEFT ELLIPSIS */
-    if (start > 2) {
-        pagination.appendChild(createBtn('…', 0, false, true));
-    }
-
-    /* MIDDLE PAGES */
-    for (let i = start; i <= end; i++) {
-        pagination.appendChild(createBtn(i, i, i === currentPage));
-    }
-
-    /* RIGHT ELLIPSIS */
-    if (end < totalPages - 1) {
-        pagination.appendChild(createBtn('…', 0, false, true));
-    }
-
-    /* LAST PAGE */
-    if (totalPages > 1) {
-        pagination.appendChild(
-            createBtn(totalPages, totalPages, currentPage === totalPages)
-        );
-    }
-
-    /* NEXT */
-    if (currentPage < totalPages) {
-        pagination.appendChild(createBtn('Next ›', currentPage + 1));
-    }
-}
 
 
 
-    /* EVENTS */
-    perPageEl.onchange = () => {
-        perPage = perPageEl.value;
-        localStorage.setItem('payments_per_page', perPage);
-        currentPage = 1;
-        renderTable();
-    };
+            /* EVENTS */
+            perPageEl.onchange = () => {
+                perPage = perPageEl.value;
+                localStorage.setItem('auction_per_page', perPage);
+                currentPage = 1;
+                renderTable();
+            };
 
-    searchBox.onkeyup = () => {
-        currentPage = 1;
-        renderTable();
-    };
+            searchBox.onkeyup = () => {
+                currentPage = 1;
+                renderTable();
+            };
 
-    groupDrop.onchange = () => {
-        currentPage = 1;
-        renderTable();
-    };
+            groupDrop.onchange = () => {
+                currentPage = 1;
+                renderTable();
+            };
 
-    memberDrop.onchange = () => {
-        currentPage = 1;
-        renderTable();
-    };
-
-    renderTable(); // init
-});
+            renderTable(); // init
+        });
 </script>

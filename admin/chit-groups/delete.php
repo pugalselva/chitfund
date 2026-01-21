@@ -28,14 +28,17 @@ $q = $conn->prepare("
     SELECT COUNT(*) AS cnt 
     FROM auctions 
     WHERE chit_group_id=?
+    AND status IN ('active','upcoming')
 ");
 $q->bind_param("i", $groupId);
 $q->execute();
+
 $cnt = $q->get_result()->fetch_assoc()['cnt'];
 
 if ($cnt > 0) {
-    die('Cannot delete group with auctions');
+    die('Cannot delete group with active or upcoming auctions');
 }
+
 
 /* Soft delete */
 $stmt = $conn->prepare("
@@ -47,3 +50,4 @@ $stmt->bind_param("i", $groupId);
 $stmt->execute();
 
 echo 'success';
+?>

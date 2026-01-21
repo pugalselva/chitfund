@@ -43,10 +43,10 @@ ORDER BY a.auction_datetime DESC
 
 $stmt = $conn->prepare($sql);
 if (!$stmt) {
-    die("SQL ERROR: " . $conn->error);
+    die('SQL ERROR: ' . $conn->error);
 }
 
-$stmt->bind_param("s", $memberId);
+$stmt->bind_param('s', $memberId);
 $stmt->execute();
 $result = $stmt->get_result();
 ?>
@@ -87,10 +87,7 @@ $result = $stmt->get_result();
             </div>
 
             <div class="content">
-
                 <!-- AUCTION 1 -->
-
-
                 <!-- AUCTION 2 -->
                 <?php if ($result->num_rows == 0): ?>
                 <p>No auction history available.</p>
@@ -100,9 +97,7 @@ $result = $stmt->get_result();
                     $totalDiscount = $row['pool_amount'] - $row['winning_bid_amount'];
                     $memberShare = round($totalDiscount / $row['total_members']);
                 ?>
-
                 <div class="auction-history-card">
-
                     <div class="auction-header">
                         <div>
                             <div class="auction-title">
@@ -132,7 +127,6 @@ $result = $stmt->get_result();
                                 <small><?= $row['winner_member_id'] ?></small>
                             </div>
                         </div>
-
                         <div class="meta-item">
                             <div class="meta-icon icon-green">📉</div>
                             <div>
@@ -173,4 +167,5 @@ $result = $stmt->get_result();
         </div>
     </div>
 </body>
+
 </html>

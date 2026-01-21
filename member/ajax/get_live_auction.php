@@ -13,6 +13,7 @@ if ($q->num_rows == 0) {
     echo json_encode(['status' => 'no_auction']);
     exit;
 }
-
 $auction = $q->fetch_assoc();
 echo json_encode($auction);
+
+?>
