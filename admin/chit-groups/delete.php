@@ -1,4 +1,5 @@
 <?php
+session_name('chitfund_admin');
 session_start();
 include '../../config/database.php';
 
@@ -12,7 +13,7 @@ if (empty($_POST['id']) || !is_numeric($_POST['id'])) {
     die('Invalid group ID');
 }
 
-$groupId = (int)$_POST['id'];
+$groupId = (int) $_POST['id'];
 
 /* Check group exists */
 $check = $conn->prepare("SELECT id FROM chit_groups WHERE id=?");

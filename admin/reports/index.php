@@ -136,7 +136,7 @@ $completedAuctions = $conn
                                 <small><?= $totalMembers ?> members</small>
                             </div>
                         </div>
-                       <button class="export-btn" onclick="location.href='export_members.php'">⬇ Export</button>
+                       <!-- <button class="export-btn" onclick="location.href='export_members.php'">⬇ Export</button> -->
                     </div>
 
                     <div class="report-box">
@@ -148,7 +148,7 @@ $completedAuctions = $conn
                                 <small><?= $totalGroups ?> groups</small>
                             </div>
                         </div>
-                        <button class="export-btn" onclick="location.href='export_groups.php'">⬇ Export</button>
+                        <!-- <button class="export-btn" onclick="location.href='export_groups.php'">⬇ Export</button> -->
                     </div>
 
                     <div class="report-box">
@@ -160,7 +160,7 @@ $completedAuctions = $conn
                                 <small>₹<?= number_format($paymentSummary['collected']) ?> collected</small>
                             </div>
                         </div>
-                        <button class="export-btn" onclick="location.href='export_payments.php'">⬇ Export</button>
+                        <!-- <button class="export-btn" onclick="location.href='export_payments.php'">⬇ Export</button> -->
                     </div>
 
                     <div class="report-box">
@@ -172,13 +172,13 @@ $completedAuctions = $conn
                                 <small><?= $completedAuctions ?> auctions completed</small>
                             </div>
                         </div>
-                        <button class="export-btn" onclick="location.href='export_auctions.php'">⬇ Export</button>
+                        <!-- <button class="export-btn" onclick="location.href='export_auctions.php'">⬇ Export</button> -->
                     </div>
 
                 </div>
 
                 <!-- CUSTOM REPORT -->
-                <div class="custom-box">
+                <!-- <div class="custom-box">
                     <b>Custom Report Generation</b><br>
                     <small>Generate custom reports based on date range, chit groups, or specific members.</small>
 
@@ -187,7 +187,7 @@ $completedAuctions = $conn
                         <button>Defaulters List</button>
                         <button>Performance Analytics</button>
                     </div>
-                </div>
+                </div> -->
 
             </div>
         </div>

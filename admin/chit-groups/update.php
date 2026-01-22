@@ -1,4 +1,5 @@
 <?php
+session_name('chitfund_admin');
 session_start();
 include '../../config/database.php';
 
@@ -10,7 +11,7 @@ if (!isset($_POST['id'])) {
     die('Invalid request');
 }
 
-$id = (int)$_POST['id'];
+$id = (int) $_POST['id'];
 $groupName = trim($_POST['group_name']);
 $status = $_POST['status'];
 $isActive = isset($_POST['is_active']) ? 1 : 0;

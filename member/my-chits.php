@@ -1,11 +1,6 @@
 <?php
-session_start();
+include 'auth.php';
 include '../config/database.php';
-
-if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'member') {
-    header('Location: ../index.php');
-    exit();
-}
 
 $name = $_SESSION['name'] ?? 'Member';
 $email = $_SESSION['email'] ?? '';
@@ -90,9 +85,9 @@ $result = $stmt->get_result();
 
         <div class="main">
 
-            
+
             <div class="topbar">
-               <div>
+                <div>
                     <div class="page-title">My Chit Groups</div>
                     <div class="page-subtitle">View and manage your chit memberships</div>
                 </div>
@@ -112,15 +107,15 @@ $result = $stmt->get_result();
                 <div class="chit-grid">
 
                     <?php if ($result->num_rows === 0): ?>
-                    <p>No chit groups assigned to you.</p>
+                        <p>No chit groups assigned to you.</p>
                     <?php endif; ?>
 
-                    <?php while ($g = $result->fetch_assoc()): 
-                        $completed = (int)$g['completed_months'];
-                        $duration  = (int)$g['duration_months'];
-                        $members   = (int)$g['total_members'];
+                    <?php while ($g = $result->fetch_assoc()):
+                        $completed = (int) $g['completed_months'];
+                        $duration = (int) $g['duration_months'];
+                        $members = (int) $g['total_members'];
 
-                        $winningAmount = (float)$g['last_winning_amount'];
+                        $winningAmount = (float) $g['last_winning_amount'];
 
                         /* Monthly Contribution */
                         $monthlyContribution = 0;
@@ -128,111 +123,111 @@ $result = $stmt->get_result();
                         if ($members > 0 && $winningAmount > 0) {
                             $monthlyContribution = round($winningAmount / $members);
                         }
-                    ?>
+                        ?>
 
-                    <div class="chit-card">
+                        <div class="chit-card">
 
-                        <!-- HEADER -->
-                        <div class="chit-header">
-                            <div>
-                                <div class="chit-title"><?= htmlspecialchars($g['group_name']) ?></div>
-                                <small><?= htmlspecialchars($g['group_code']) ?></small>
-                            </div>
-                            <span class="badge <?= $g['status'] ?>">
-                                <?= ucfirst($g['status']) ?>
-                            </span>
-                        </div>
-
-                        <!-- STATS -->
-                        <div class="chit-stats">
-
-                            <div class="stat">
-                                <div class="icon icon-blue">₹</div>
+                            <!-- HEADER -->
+                            <div class="chit-header">
                                 <div>
-                                    Pool Amount<br>
-                                    <?php
-                                    $poolAmount = (float)($g['last_pool_amount'] ?? 0);
-                                    ?>
-
-                                    <b>
-                                        <?= $poolAmount > 0 
-                                            ? '₹' . number_format($poolAmount)
-                                            : '—' ?>
-                                    </b>
-
+                                    <div class="chit-title"><?= htmlspecialchars($g['group_name']) ?></div>
+                                    <small><?= htmlspecialchars($g['group_code']) ?></small>
                                 </div>
+                                <span class="badge <?= $g['status'] ?>">
+                                    <?= ucfirst($g['status']) ?>
+                                </span>
                             </div>
 
-                            <div class="stat">
-                                <div class="icon icon-green">👥</div>
+                            <!-- STATS -->
+                            <div class="chit-stats">
+
+                                <div class="stat">
+                                    <div class="icon icon-blue">₹</div>
+                                    <div>
+                                        Pool Amount<br>
+                                        <?php
+                                        $poolAmount = (float) ($g['last_pool_amount'] ?? 0);
+                                        ?>
+
+                                        <b>
+                                            <?= $poolAmount > 0
+                                                ? '₹' . number_format($poolAmount)
+                                                : '—' ?>
+                                        </b>
+
+                                    </div>
+                                </div>
+
+                                <div class="stat">
+                                    <div class="icon icon-green">👥</div>
+                                    <div>
+                                        Total Members<br>
+                                        <b><?= $g['total_members'] ?></b>
+                                    </div>
+                                </div>
+
+                                <div class="stat">
+                                    <div class="icon icon-orange">📅</div>
+                                    <div>
+                                        Duration<br>
+                                        <b><?= $duration ?> months</b>
+                                    </div>
+                                </div>
+
+                                <div class="stat">
+                                    <div class="icon icon-green">₹</div>
+                                    <div>
+                                        Monthly Contribution<br>
+                                        <b>
+                                            <?= $monthlyContribution > 0
+                                                ? '₹' . number_format($monthlyContribution)
+                                                : '—' ?>
+                                        </b>
+                                    </div>
+                                </div>
+
+
+                            </div>
+
+                            <!-- PROGRESS -->
+                            <small>Progress</small>
+                            <div class="progress-bar">
+                                <div class="progress" style="width:<?= $percent ?>%"></div>
+                            </div>
+                            <small><?= $completed ?> / <?= $duration ?> months</small>
+                            <?php if ($monthlyContribution > 0): ?>
+                                <small style="color:#6b7280">
+                                    Based on last winning bid ₹<?= number_format($winningAmount) ?>
+                                    shared among <?= $members ?> members
+                                </small>
+                            <?php endif; ?>
+
+                            <!-- FOOTER -->
+                            <div class="chit-footer">
                                 <div>
-                                    Total Members<br>
-                                    <b><?= $g['total_members'] ?></b>
+                                    Completed Months<br>
+                                    <b><?= $completed ?></b>
                                 </div>
-                            </div>
-
-                            <div class="stat">
-                                <div class="icon icon-orange">📅</div>
-                                <div>
-                                    Duration<br>
-                                    <b><?= $duration ?> months</b>
-                                </div>
-                            </div>
-
-                            <div class="stat">
-                                <div class="icon icon-green">₹</div>
-                                <div>
-                                    Monthly Contribution<br>
-                                    <b>
-                                        <?= $monthlyContribution > 0 
-                                            ? '₹' . number_format($monthlyContribution) 
-                                            : '—' ?>
-                                    </b>
-                                </div>
-                            </div>
-
-
-                        </div>
-
-                        <!-- PROGRESS -->
-                        <small>Progress</small>
-                        <div class="progress-bar">
-                            <div class="progress" style="width:<?= $percent ?>%"></div>
-                        </div>
-                        <small><?= $completed ?> / <?= $duration ?> months</small>
-                        <?php if ($monthlyContribution > 0): ?>
-                        <small style="color:#6b7280">
-                            Based on last winning bid ₹<?= number_format($winningAmount) ?> 
-                            shared among <?= $members ?> members
-                        </small>
-                        <?php endif; ?>
-
-                        <!-- FOOTER -->
-                        <div class="chit-footer">
-                            <div>
-                                Completed Months<br>
-                                <b><?= $completed ?></b>
-                            </div>
-                            <!-- <div>
+                                <!-- <div>
                                 Remaining Months<br>
                                 <b><?= $remaining ?></b>
                             </div> -->
-                            <div>
-                                Auction Type<br>
-                                <b><?= $g['auction_type'] ?></b>
+                                <div>
+                                    Auction Type<br>
+                                    <b><?= $g['auction_type'] ?></b>
+                                </div>
+                                <div>
+                                    Foreman Commission<br>
+                                    <b><?= $g['commission'] ?>%</b>
+                                </div>
                             </div>
-                            <div>
-                                Foreman Commission<br>
-                                <b><?= $g['commission'] ?>%</b>
-                            </div>
-                        </div>
 
-                        <!-- TOTAL -->
-                        <div class="chit-total">
-                            Total Chit Value<br>
-                            <b>₹<?= number_format($g['total_value']) ?></b>
+                            <!-- TOTAL -->
+                            <div class="chit-total">
+                                Total Chit Value<br>
+                                <b>₹<?= number_format($g['total_value']) ?></b>
+                            </div>
                         </div>
-                    </div>
                     <?php endwhile; ?>
                 </div>
             </div>

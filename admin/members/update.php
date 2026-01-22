@@ -125,3 +125,4 @@ if ($newPass !== '') {
 /* ---------- DONE ---------- */
 header('Location: view.php?id=' . $memberId . '&updated=1');
 exit();
+?>

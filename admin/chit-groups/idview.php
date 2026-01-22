@@ -1,4 +1,5 @@
 <?php
+session_name('chitfund_admin');
 session_start();
 include '../../config/database.php';
 
@@ -53,7 +54,7 @@ $maxMembers = (int) $g['total_members'];
     <title>View Chit Group</title>
     <link rel="stylesheet" href="../../assets/css/style.css">
     <style>
-                /* ===============================
+        /* ===============================
         PAGE STRUCTURE
         ================================ */
         .wrapper {
@@ -67,7 +68,7 @@ $maxMembers = (int) $g['total_members'];
             padding: 24px 28px;
         }
 
-                /* ===============================
+        /* ===============================
         TOPBAR
         ================================ */
         .topbar {
@@ -89,14 +90,14 @@ $maxMembers = (int) $g['total_members'];
             margin-top: 4px;
         }
 
-                /* ===============================
+        /* ===============================
         CONTENT
         ================================ */
         .content {
             max-width: 1100px;
         }
 
-                /* ===============================
+        /* ===============================
         GROUP DETAILS CARD
         ================================ */
         .form-box {
@@ -127,7 +128,7 @@ $maxMembers = (int) $g['total_members'];
             min-width: 170px;
         }
 
-                /* ===============================
+        /* ===============================
         STATUS BADGES
         ================================ */
         .badge {
@@ -278,30 +279,31 @@ $maxMembers = (int) $g['total_members'];
                     </h3>
 
                     <?php if ($assignedCount === 0): ?>
-                    <p style="color:#888;">No members assigned to this group.</p>
+                        <p style="color:#888;">No members assigned to this group.</p>
                     <?php else: ?>
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Member ID</th>
-                                <th>Name</th>
-                                <th>Mobile</th>
-                                <th>Joined On</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php $i=1; while($m = $members->fetch_assoc()): ?>
-                            <tr>
-                                <td><?= $i++ ?></td>
-                                <td><?= htmlspecialchars($m['member_id']) ?></td>
-                                <td><?= htmlspecialchars($m['full_name']) ?></td>
-                                <td><?= htmlspecialchars($m['mobile']) ?></td>
-                                <td><?= date('d M Y', strtotime($m['joined_at'])) ?></td>
-                            </tr>
-                            <?php endwhile; ?>
-                        </tbody>
-                    </table>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Member ID</th>
+                                    <th>Name</th>
+                                    <th>Mobile</th>
+                                    <th>Joined On</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php $i = 1;
+                                while ($m = $members->fetch_assoc()): ?>
+                                    <tr>
+                                        <td><?= $i++ ?></td>
+                                        <td><?= htmlspecialchars($m['member_id']) ?></td>
+                                        <td><?= htmlspecialchars($m['full_name']) ?></td>
+                                        <td><?= htmlspecialchars($m['mobile']) ?></td>
+                                        <td><?= date('d M Y', strtotime($m['joined_at'])) ?></td>
+                                    </tr>
+                                <?php endwhile; ?>
+                            </tbody>
+                        </table>
                     <?php endif; ?>
                 </div>
                 <a href="index.php" class="btn-secondary">← Back</a>
@@ -311,7 +313,7 @@ $maxMembers = (int) $g['total_members'];
     </div>
 
     <script>
-        document.getElementById('search').addEventListener('keyup', function() {
+        document.getElementById('search').addEventListener('keyup', function () {
             const value = this.value.toLowerCase();
             document.querySelectorAll('#memberTable tbody tr').forEach(row => {
                 row.style.display = row.innerText.toLowerCase().includes(value) ?

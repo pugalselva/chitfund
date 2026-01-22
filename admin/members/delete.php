@@ -1,4 +1,5 @@
 <?php
+session_name('chitfund_admin');
 session_start();
 include '../../config/database.php';
 
@@ -7,7 +8,8 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
 }
 
 $memberId = $_POST['member_id'] ?? '';
-if (!$memberId) die('Invalid member ID');
+if (!$memberId)
+    die('Invalid member ID');
 
 /* 1. Prevent delete if payments exist */
 $q = $conn->prepare("
@@ -30,7 +32,7 @@ $getUser = $conn->prepare("
 $getUser->bind_param("s", $memberId);
 $getUser->execute();
 $userRow = $getUser->get_result()->fetch_assoc();
-$userId  = $userRow['user_id'] ?? null;
+$userId = $userRow['user_id'] ?? null;
 
 /* 3. Delete group mappings */
 $stmt = $conn->prepare("

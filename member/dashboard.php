@@ -1,17 +1,9 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
+include 'auth.php';
 include '../config/database.php';
 
-if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'member') {
-    header('Location: ../index.php');
-    exit();
-}
-
 $memberId = $_SESSION['member_id'];
-$name  = $_SESSION['name'] ?? 'Member';
+$name = $_SESSION['name'] ?? 'Member';
 $email = $_SESSION['email'] ?? '';
 
 /* =========================
@@ -27,7 +19,7 @@ $stmt = $conn->prepare("
 
 $stmt->bind_param("s", $memberId);
 $stmt->execute();
-$activeChits = (int)$stmt->get_result()->fetch_assoc()['total'];
+$activeChits = (int) $stmt->get_result()->fetch_assoc()['total'];
 
 /* =========================
    TOTAL CONTRIBUTIONS
@@ -40,7 +32,7 @@ $stmt = $conn->prepare("
 ");
 $stmt->bind_param("s", $memberId);
 $stmt->execute();
-$totalPaid = (int)$stmt->get_result()->fetch_assoc()['total_paid'];
+$totalPaid = (int) $stmt->get_result()->fetch_assoc()['total_paid'];
 
 /* =========================
    UPCOMING AUCTION
@@ -79,7 +71,7 @@ $stmt = $conn->prepare("
 
 $stmt->bind_param("s", $memberId);
 $stmt->execute();
-$completedMonths = (int)$stmt->get_result()->fetch_assoc()['completed'];
+$completedMonths = (int) $stmt->get_result()->fetch_assoc()['completed'];
 
 $stmt = $conn->prepare("
     SELECT IFNULL(SUM(g.duration_months),0) AS total_months
@@ -90,7 +82,7 @@ $stmt = $conn->prepare("
 ");
 $stmt->bind_param("s", $memberId);
 $stmt->execute();
-$totalMonths = (int)$stmt->get_result()->fetch_assoc()['total_months'];
+$totalMonths = (int) $stmt->get_result()->fetch_assoc()['total_months'];
 
 $savingsProgress = $totalMonths > 0
     ? round(($completedMonths / $totalMonths) * 100)
@@ -200,17 +192,17 @@ $payments = $stmt->get_result();
                     <!-- ACTIVE GROUPS -->
                     <div class="box">
                         <h4>My Active Groups</h4><br>
-                        <?php while ($g = $groups->fetch_assoc()): 
+                        <?php while ($g = $groups->fetch_assoc()):
                             $monthly = $g['duration_months'] > 0
                                 ? round($g['total_value'] / $g['duration_months'])
                                 : 0;
-                        ?>
-                        <b><?= htmlspecialchars($g['group_name']) ?></b><br>
-                        <small>
-                            Month <?= $g['completed_months'] + 1 ?> of <?= $g['duration_months'] ?>
-                            · ₹<?= number_format($monthly) ?>/month
-                        </small>
-                        <hr style="margin:15px 0;">
+                            ?>
+                            <b><?= htmlspecialchars($g['group_name']) ?></b><br>
+                            <small>
+                                Month <?= $g['completed_months'] + 1 ?> of <?= $g['duration_months'] ?>
+                                · ₹<?= number_format($monthly) ?>/month
+                            </small>
+                            <hr style="margin:15px 0;">
                         <?php endwhile; ?>
 
                     </div>
@@ -220,23 +212,23 @@ $payments = $stmt->get_result();
                         <h4>Recent Payments</h4><br>
 
                         <?php if ($payments->num_rows === 0): ?>
-                        <small>No payments yet</small>
+                            <small>No payments yet</small>
                         <?php endif; ?>
 
-                        <?php while($p = $payments->fetch_assoc()): ?>
-                        <div style="display:flex;justify-content:space-between;">
-                            <div>
-                                <b><?= htmlspecialchars($p['group_name']) ?></b><br>
-                                <small>Month <?= $p['month_no'] ?></small>
+                        <?php while ($p = $payments->fetch_assoc()): ?>
+                            <div style="display:flex;justify-content:space-between;">
+                                <div>
+                                    <b><?= htmlspecialchars($p['group_name']) ?></b><br>
+                                    <small>Month <?= $p['month_no'] ?></small>
+                                </div>
+                                <div style="text-align:right;">
+                                    ₹<?= number_format($p['final_amount']) ?><br>
+                                    <small style="color:<?= $p['status'] == 'paid' ? 'green' : '#ea580c' ?>">
+                                        <?= ucfirst($p['status']) ?>
+                                    </small>
+                                </div>
                             </div>
-                            <div style="text-align:right;">
-                                ₹<?= number_format($p['final_amount']) ?><br>
-                                <small style="color:<?= $p['status'] == 'paid' ? 'green' : '#ea580c' ?>">
-                                    <?= ucfirst($p['status']) ?>
-                                </small>
-                            </div>
-                        </div>
-                        <hr style="margin:15px 0;">
+                            <hr style="margin:15px 0;">
                         <?php endwhile; ?>
                     </div>
                 </div>
@@ -244,4 +236,5 @@ $payments = $stmt->get_result();
         </div>
     </div>
 </body>
+
 </html>

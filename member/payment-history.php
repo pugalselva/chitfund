@@ -1,11 +1,6 @@
 <?php
-session_start();
+include 'auth.php';
 include '../config/database.php';
-
-if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'member') {
-    header('Location: ../index.php');
-    exit();
-}
 
 $name = $_SESSION['name'] ?? 'Member';
 $email = $_SESSION['email'] ?? '';
@@ -66,7 +61,7 @@ $result = $stmt->get_result();
             background: #2563eb;
             color: #fff;
             border-color: #2563eb;
-        }   
+        }
     </style>
 </head>
 
@@ -137,10 +132,10 @@ $result = $stmt->get_result();
                                 ORDER BY g.group_name
                             ");
                             while ($g = $groups->fetch_assoc()):
-                            ?>
-                            <option value="<?= htmlspecialchars($g['group_name']) ?>">
-                                <?= htmlspecialchars($g['group_name']) ?>
-                            </option>
+                                ?>
+                                <option value="<?= htmlspecialchars($g['group_name']) ?>">
+                                    <?= htmlspecialchars($g['group_name']) ?>
+                                </option>
                             <?php endwhile; ?>
                         </select>
 
@@ -169,48 +164,48 @@ $result = $stmt->get_result();
 
                             <tbody id="paymentTableBody">
                                 <?php if ($result->num_rows === 0): ?>
-                                <tr>
-                                    <td colspan="10">No payment records found.</td>
-                                </tr>
+                                    <tr>
+                                        <td colspan="10">No payment records found.</td>
+                                    </tr>
                                 <?php endif; ?>
 
                                 <?php while ($p = $result->fetch_assoc()): ?>
-                                <tr>
-                                    <td><?= htmlspecialchars($p['receipt_no']) ?></td>
+                                    <tr>
+                                        <td><?= htmlspecialchars($p['receipt_no']) ?></td>
 
-                                    <td>
-                                        <?= htmlspecialchars($p['group_name']) ?><br>
-                                        <small><?= htmlspecialchars($p['group_code']) ?></small>
-                                    </td>
+                                        <td>
+                                            <?= htmlspecialchars($p['group_name']) ?><br>
+                                            <small><?= htmlspecialchars($p['group_code']) ?></small>
+                                        </td>
 
-                                    <td>Month <?= $p['month_no'] ?></td>
+                                        <td>Month <?= $p['month_no'] ?></td>
 
-                                    <td>₹<?= number_format($p['actual_amount']) ?></td>
+                                        <td>₹<?= number_format($p['actual_amount']) ?></td>
 
-                                    <td style="color:#16a34a;">
-                                        <?= $p['discount_amount'] > 0 ? '-₹' . number_format($p['discount_amount']) : '₹0' ?>
-                                    </td>
+                                        <td style="color:#16a34a;">
+                                            <?= $p['discount_amount'] > 0 ? '-₹' . number_format($p['discount_amount']) : '₹0' ?>
+                                        </td>
 
-                                    <td>₹<?= number_format($p['final_amount']) ?></td>
+                                        <td>₹<?= number_format($p['final_amount']) ?></td>
 
-                                    <td>
-                                        <span class="mode <?= strtolower($p['payment_mode']) ?>">
-                                            <?= strtoupper($p['payment_mode']) ?>
-                                        </span>
-                                    </td>
+                                        <td>
+                                            <span class="mode <?= strtolower($p['payment_mode']) ?>">
+                                                <?= strtoupper($p['payment_mode']) ?>
+                                            </span>
+                                        </td>
 
-                                    <td><?= date('d/m/Y', strtotime($p['due_date'])) ?></td>
+                                        <td><?= date('d/m/Y', strtotime($p['due_date'])) ?></td>
 
-                                    <td>
-                                        <?= $p['payment_date'] ? date('d/m/Y', strtotime($p['payment_date'])) : '-' ?>
-                                    </td>
+                                        <td>
+                                            <?= $p['payment_date'] ? date('d/m/Y', strtotime($p['payment_date'])) : '-' ?>
+                                        </td>
 
-                                    <td>
-                                        <span class="badge <?= $p['status'] ?>">
-                                            <?= ucfirst($p['status']) ?>
-                                        </span>
-                                    </td>
-                                </tr>
+                                        <td>
+                                            <span class="badge <?= $p['status'] ?>">
+                                                <?= ucfirst($p['status']) ?>
+                                            </span>
+                                        </td>
+                                    </tr>
                                 <?php endwhile; ?>
                             </tbody>
                         </table>
@@ -232,135 +227,135 @@ $result = $stmt->get_result();
             </div>
         </div>
     </div>
-<!-- script -->
- <script>
-document.addEventListener('DOMContentLoaded', () => {
+    <!-- script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
 
-    const tbody      = document.getElementById('paymentTableBody');
-    const rows       = Array.from(tbody.querySelectorAll('tr'));
+            const tbody = document.getElementById('paymentTableBody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
 
-    const searchBox  = document.getElementById('searchBox');
-    const groupDrop  = document.getElementById('groupFilter');
-    const perPageEl  = document.getElementById('perPage');
-    const pagination = document.getElementById('pagination');
+            const searchBox = document.getElementById('searchBox');
+            const groupDrop = document.getElementById('groupFilter');
+            const perPageEl = document.getElementById('perPage');
+            const pagination = document.getElementById('pagination');
 
-    let currentPage = 1;
+            let currentPage = 1;
 
-    /* 🔐 Restore page size */
-    let perPage = localStorage.getItem('member_payments_per_page') || perPageEl.value;
-    perPageEl.value = perPage;
+            /* 🔐 Restore page size */
+            let perPage = localStorage.getItem('member_payments_per_page') || perPageEl.value;
+            perPageEl.value = perPage;
 
-    function getFilteredRows() {
-        const search = searchBox.value.toLowerCase();
-        const group  = groupDrop.value.toLowerCase();
+            function getFilteredRows() {
+                const search = searchBox.value.toLowerCase();
+                const group = groupDrop.value.toLowerCase();
 
-        return rows.filter(row => {
-            const text      = row.innerText.toLowerCase();
-            const groupName = row.children[1].innerText.toLowerCase(); // group column
+                return rows.filter(row => {
+                    const text = row.innerText.toLowerCase();
+                    const groupName = row.children[1].innerText.toLowerCase(); // group column
 
-            return (
-                text.includes(search) &&
-                (!group || groupName.includes(group))
-            );
-        });
-    }
-
-    function renderTable() {
-        const filtered = getFilteredRows();
-        const totalPages = Math.ceil(filtered.length / perPage) || 1;
-
-        currentPage = Math.min(currentPage, totalPages);
-
-        rows.forEach(r => r.style.display = 'none');
-
-        filtered
-            .slice((currentPage - 1) * perPage, currentPage * perPage)
-            .forEach(r => r.style.display = '');
-
-        renderPagination(totalPages);
-    }
-
-    function renderPagination(totalPages) {
-    pagination.innerHTML = '';
-
-    const createBtn = (label, page, active = false, disabled = false) => {
-        const btn = document.createElement('button');
-        btn.textContent = label;
-
-        if (active) btn.classList.add('active');
-        if (disabled) btn.disabled = true;
-
-        btn.onclick = () => {
-            if (!disabled) {
-                currentPage = page;
-                renderTable();
+                    return (
+                        text.includes(search) &&
+                        (!group || groupName.includes(group))
+                    );
+                });
             }
-        };
-        return btn;
-    };
 
-    /* PREV */
-    if (currentPage > 1) {
-        pagination.appendChild(createBtn('‹ Prev', currentPage - 1));
-    }
+            function renderTable() {
+                const filtered = getFilteredRows();
+                const totalPages = Math.ceil(filtered.length / perPage) || 1;
 
-    const range = 1; // pages around current
-    let start = Math.max(2, currentPage - range);
-    let end   = Math.min(totalPages - 1, currentPage + range);
+                currentPage = Math.min(currentPage, totalPages);
 
-    /* FIRST PAGE */
-    pagination.appendChild(createBtn(1, 1, currentPage === 1));
+                rows.forEach(r => r.style.display = 'none');
 
-    /* LEFT ELLIPSIS */
-    if (start > 2) {
-        pagination.appendChild(createBtn('…', 0, false, true));
-    }
+                filtered
+                    .slice((currentPage - 1) * perPage, currentPage * perPage)
+                    .forEach(r => r.style.display = '');
 
-    /* MIDDLE PAGES */
-    for (let i = start; i <= end; i++) {
-        pagination.appendChild(createBtn(i, i, i === currentPage));
-    }
+                renderPagination(totalPages);
+            }
 
-    /* RIGHT ELLIPSIS */
-    if (end < totalPages - 1) {
-        pagination.appendChild(createBtn('…', 0, false, true));
-    }
+            function renderPagination(totalPages) {
+                pagination.innerHTML = '';
 
-    /* LAST PAGE */
-    if (totalPages > 1) {
-        pagination.appendChild(
-            createBtn(totalPages, totalPages, currentPage === totalPages)
-        );
-    }
+                const createBtn = (label, page, active = false, disabled = false) => {
+                    const btn = document.createElement('button');
+                    btn.textContent = label;
 
-    /* NEXT */
-    if (currentPage < totalPages) {
-        pagination.appendChild(createBtn('Next ›', currentPage + 1));
-    }
-}
+                    if (active) btn.classList.add('active');
+                    if (disabled) btn.disabled = true;
+
+                    btn.onclick = () => {
+                        if (!disabled) {
+                            currentPage = page;
+                            renderTable();
+                        }
+                    };
+                    return btn;
+                };
+
+                /* PREV */
+                if (currentPage > 1) {
+                    pagination.appendChild(createBtn('‹ Prev', currentPage - 1));
+                }
+
+                const range = 1; // pages around current
+                let start = Math.max(2, currentPage - range);
+                let end = Math.min(totalPages - 1, currentPage + range);
+
+                /* FIRST PAGE */
+                pagination.appendChild(createBtn(1, 1, currentPage === 1));
+
+                /* LEFT ELLIPSIS */
+                if (start > 2) {
+                    pagination.appendChild(createBtn('…', 0, false, true));
+                }
+
+                /* MIDDLE PAGES */
+                for (let i = start; i <= end; i++) {
+                    pagination.appendChild(createBtn(i, i, i === currentPage));
+                }
+
+                /* RIGHT ELLIPSIS */
+                if (end < totalPages - 1) {
+                    pagination.appendChild(createBtn('…', 0, false, true));
+                }
+
+                /* LAST PAGE */
+                if (totalPages > 1) {
+                    pagination.appendChild(
+                        createBtn(totalPages, totalPages, currentPage === totalPages)
+                    );
+                }
+
+                /* NEXT */
+                if (currentPage < totalPages) {
+                    pagination.appendChild(createBtn('Next ›', currentPage + 1));
+                }
+            }
 
 
-    /* EVENTS */
-    perPageEl.onchange = () => {
-        perPage = perPageEl.value;
-        localStorage.setItem('member_payments_per_page', perPage);
-        currentPage = 1;
-        renderTable();
-    };
+            /* EVENTS */
+            perPageEl.onchange = () => {
+                perPage = perPageEl.value;
+                localStorage.setItem('member_payments_per_page', perPage);
+                currentPage = 1;
+                renderTable();
+            };
 
-    searchBox.onkeyup = () => {
-        currentPage = 1;
-        renderTable();
-    };
+            searchBox.onkeyup = () => {
+                currentPage = 1;
+                renderTable();
+            };
 
-    groupDrop.onchange = () => {
-        currentPage = 1;
-        renderTable();
-    };
+            groupDrop.onchange = () => {
+                currentPage = 1;
+                renderTable();
+            };
 
-    renderTable(); // init
-});
-</script>
+            renderTable(); // init
+        });
+    </script>
 
 </body>
 

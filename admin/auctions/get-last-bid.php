@@ -1,4 +1,5 @@
 <?php
+session_name('chitfund_admin');
 session_start();
 include '../../config/database.php';
 
@@ -7,7 +8,7 @@ if ($_SESSION['role'] !== 'admin') {
     exit;
 }
 
-$groupId = (int)($_GET['group_id'] ?? 0);
+$groupId = (int) ($_GET['group_id'] ?? 0);
 if (!$groupId) {
     echo '';
     exit;

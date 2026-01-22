@@ -1,33 +1,43 @@
 <?php
-session_start();
+include 'auth.php';
 include '../config/database.php';
-
-if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'member') {
-    header('Location: ../index.php');
-    exit();
-}
 
 $name = $_SESSION['name'] ?? 'Member';
 $email = $_SESSION['email'] ?? '';
 
-/* Get ACTIVE auction */
-$q = $conn->query("
-SELECT a.*, cg.group_name
-FROM auctions a
-JOIN chit_groups cg ON cg.id = a.chit_group_id
-WHERE a.status = 'active'
-LIMIT 1
-");
+$auctionId = (int) ($_GET['auction_id'] ?? 0);
 
-if ($q->num_rows == 0) {
-    echo "<h3 style='padding:20px'>No live auction right now</h3>";
+if ($auctionId > 0) {
+    /* Fetch specific auction */
+    $q = $conn->prepare("
+        SELECT a.*, cg.group_name, m.full_name as winner_name
+        FROM auctions a
+        JOIN chit_groups cg ON cg.id = a.chit_group_id
+        LEFT JOIN members m ON m.member_id = a.winner_member_id
+        WHERE a.id = ?
+    ");
+    $q->bind_param("i", $auctionId);
+    $q->execute();
+    $result = $q->get_result();
+} else {
+    /* Get active auction */
+    $result = $conn->query("
+        SELECT a.*, cg.group_name
+        FROM auctions a
+        JOIN chit_groups cg ON cg.id = a.chit_group_id
+        WHERE a.status = 'active'
+        LIMIT 1
+    ");
+}
+
+if ($result->num_rows == 0) {
+    echo "<div style='padding:20px'>Auction not found</div>";
     exit();
 }
 
-$auction = $q->fetch_assoc();
+$auction = $result->fetch_assoc();
 $auctionId = $auction['id'];
 $poolAmount = $auction['starting_bid_amount'];
-
 ?>
 
 
@@ -64,24 +74,42 @@ $poolAmount = $auction['starting_bid_amount'];
             <div class="content">
                 <div class="auction-box">
                     <h4>🔨 <?= $auction['group_name'] ?> - Month <?= $auction['auction_month'] ?></h4>
-                    <small>Pool Amount: ₹<?= number_format($poolAmount) ?></small>
-                    <!-- CURRENT LOWEST BID -->
-                    <div class="bid-highlight">
-                        <small>Current Lowest Bid</small>
-                        <h2 id="lowestBid">₹ —</h2>
-                        <small id="lowestBidBy">No bids yet</small>
-                    </div>
-                    <!-- BID INPUT -->
-                    <label>Your Bid Amount (₹)</label><br>
-                    <input type="number" class="bid-input" id="bidAmount"
-                        placeholder="Enter amount less than <?= $poolAmount ?>">
+                    <?php if ($auction['status'] === 'active'): ?>
+                        <!-- ACTIVE AUCTION UI -->
+                        <small>Pool Amount: ₹<?= number_format($poolAmount) ?></small>
 
-                    <div class="bid-note">
-                        Lower bid amount = Higher discount for all members
-                    </div>
-                    <button class="place-bid-btn" onclick="placeBid()">
-                        Place Bid
-                    </button>
+                        <div class="bid-highlight">
+                            <small>Current Lowest Bid</small>
+                            <h2 id="lowestBid">₹ —</h2>
+                            <small id="lowestBidBy">No bids yet</small>
+                        </div>
+
+                        <label>Your Bid Amount (₹)</label><br>
+                        <input type="number" class="bid-input" id="bidAmount"
+                            placeholder="Enter amount less than <?= $poolAmount ?>">
+
+                        <div class="bid-note">
+                            Lower bid amount = Higher discount for all members
+                        </div>
+                        <button class="place-bid-btn" onclick="placeBid()">
+                            Place Bid
+                        </button>
+
+                    <?php else: ?>
+                        <!-- COMPLETED AUCTION UI -->
+                        <div class="bid-highlight" style="background:#dcfce7; border-color:#86efac;">
+                            <small style="color:#166534">Winner</small>
+                            <h2 style="color:#15803d"><?= htmlspecialchars($auction['winner_name'] ?? '—') ?></h2>
+                            <small style="color:#166534">Winning Bid:
+                                ₹<?= number_format($auction['winning_bid_amount']) ?></small>
+                        </div>
+
+                        <div style="margin-top:20px; padding:15px; background:#f8fafc; border-radius:10px;">
+                            <div>Pool Amount: <b>₹<?= number_format($poolAmount) ?></b></div>
+                            <div>Total Discount: <b>₹<?= number_format($poolAmount - $auction['winning_bid_amount']) ?></b>
+                            </div>
+                        </div>
+                    <?php endif; ?>
                 </div>
                 <br>
                 <!-- ALL BIDS -->
@@ -141,12 +169,12 @@ $poolAmount = $auction['starting_bid_amount'];
         }
 
         fetch('ajax/place_bid.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                body: `auction_id=${auctionId}&bid_amount=${amount}`
-            })
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: `auction_id=${auctionId}&bid_amount=${amount}`
+        })
             .then(res => res.json())
             .then(resp => {
                 if (resp.error) {

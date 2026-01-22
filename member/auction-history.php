@@ -1,11 +1,7 @@
 <?php
-session_start();
+include 'auth.php';
 include '../config/database.php';
-
-if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'member') {
-    header('Location: ../index.php');
-    exit();
-}
+// Auth handled by auth.php
 
 $name = $_SESSION['name'] ?? 'Member';
 $email = $_SESSION['email'] ?? '';
@@ -90,82 +86,80 @@ $result = $stmt->get_result();
                 <!-- AUCTION 1 -->
                 <!-- AUCTION 2 -->
                 <?php if ($result->num_rows == 0): ?>
-                <p>No auction history available.</p>
+                    <p>No auction history available.</p>
                 <?php endif; ?>
 
-                <?php while ($row = $result->fetch_assoc()): 
+                <?php while ($row = $result->fetch_assoc()):
                     $totalDiscount = $row['pool_amount'] - $row['winning_bid_amount'];
                     $memberShare = round($totalDiscount / $row['total_members']);
-                ?>
-                <div class="auction-history-card">
-                    <div class="auction-header">
-                        <div>
-                            <div class="auction-title">
-                                <?= htmlspecialchars($row['group_name']) ?> - Month <?= $row['auction_month'] ?>
-                            </div>
-                            <small>AUC<?= str_pad($row['auction_id'], 3, '0', STR_PAD_LEFT) ?></small>
-                        </div>
-                        <span class="badge completed">Completed</span>
-                    </div>
-
-                    <div class="auction-meta">
-
-                        <div class="meta-item">
-                            <div class="meta-icon icon-blue">📅</div>
+                    ?>
+                    <div class="auction-history-card">
+                        <div class="auction-header">
                             <div>
-                                Auction Date<br>
-                                <b><?= date('d/m/Y', strtotime($row['auction_datetime'])) ?></b><br>
-                                <small><?= date('h:i:s a', strtotime($row['auction_datetime'])) ?></small>
+                                <div class="auction-title">
+                                    <?= htmlspecialchars($row['group_name']) ?> - Month <?= $row['auction_month'] ?>
+                                </div>
+                                <small>AUC<?= str_pad($row['auction_id'], 3, '0', STR_PAD_LEFT) ?></small>
                             </div>
+                            <span class="badge completed">Completed</span>
                         </div>
 
-                        <div class="meta-item">
-                            <div class="meta-icon icon-purple">🏆</div>
+                        <div class="auction-meta">
+
+                            <div class="meta-item">
+                                <div class="meta-icon icon-blue">📅</div>
+                                <div>
+                                    Auction Date<br>
+                                    <b><?= date('d/m/Y', strtotime($row['auction_datetime'])) ?></b><br>
+                                    <small><?= date('h:i:s a', strtotime($row['auction_datetime'])) ?></small>
+                                </div>
+                            </div>
+
+                            <div class="meta-item">
+                                <div class="meta-icon icon-purple">🏆</div>
+                                <div>
+                                    Winner<br>
+                                    <b><?= htmlspecialchars($row['winner_name'] ?? '—') ?></b><br>
+                                    <small><?= $row['winner_member_id'] ?></small>
+                                </div>
+                            </div>
+                            <div class="meta-item">
+                                <div class="meta-icon icon-green">📉</div>
+                                <div>
+                                    Your Share of Discount<br>
+                                    <b>₹<?= number_format($memberShare) ?></b><br>
+                                    <small>
+                                        From <?= number_format(($totalDiscount / $row['pool_amount']) * 100, 2) ?>% total
+                                        discount
+                                    </small>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="auction-stats">
                             <div>
-                                Winner<br>
-                                <b><?= htmlspecialchars($row['winner_name'] ?? '—') ?></b><br>
-                                <small><?= $row['winner_member_id'] ?></small>
+                                Pool Amount<br>
+                                <b>₹<?= number_format($row['pool_amount']) ?></b>
                             </div>
-                        </div>
-                        <div class="meta-item">
-                            <div class="meta-icon icon-green">📉</div>
                             <div>
-                                Your Share of Discount<br>
-                                <b>₹<?= number_format($memberShare) ?></b><br>
-                                <small>
-                                    From <?= number_format(($totalDiscount / $row['pool_amount']) * 100, 2) ?>% total
-                                    discount
-                                </small>
+                                Winning Bid<br>
+                                <b>₹<?= number_format($row['winning_bid_amount']) ?></b>
+                            </div>
+                            <div>
+                                Total Discount<br>
+                                <b style="color:#16a34a;">₹<?= number_format($totalDiscount) ?></b>
                             </div>
                         </div>
 
-                    </div>
-
-                    <div class="auction-stats">
-                        <div>
-                            Pool Amount<br>
-                            <b>₹<?= number_format($row['pool_amount']) ?></b>
-                        </div>
-                        <div>
-                            Winning Bid<br>
-                            <b>₹<?= number_format($row['winning_bid_amount']) ?></b>
-                        </div>
-                        <div>
-                            Total Discount<br>
-                            <b style="color:#16a34a;">₹<?= number_format($totalDiscount) ?></b>
+                        <div class="auction-note">
+                            <b>How it works:</b>
+                            The discount of ₹<?= number_format($totalDiscount) ?> is distributed equally among all members.
+                            Your monthly contribution was reduced by ₹<?= number_format($memberShare) ?> this month.
                         </div>
                     </div>
-
-                    <div class="auction-note">
-                        <b>How it works:</b>
-                        The discount of ₹<?= number_format($totalDiscount) ?> is distributed equally among all members.
-                        Your monthly contribution was reduced by ₹<?= number_format($memberShare) ?> this month.
-                    </div>
-                </div>
                 <?php endwhile; ?>
             </div>
         </div>
     </div>
-</body>
-
-</html>
+</body></html>

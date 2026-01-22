@@ -25,12 +25,19 @@
 // } else echo "not_found";
 ?>
 <?php
-session_start();
 include '../config/database.php';
 
 $loginId = $_POST['login_id'] ?? '';
 $password = $_POST['password'] ?? '';
-$role     = $_POST['role'] ?? '';
+$role = $_POST['role'] ?? '';
+
+/* Use separate session names for admin and member */
+if ($role === 'admin') {
+    session_name('chitfund_admin');
+} else {
+    session_name('chitfund_member');
+}
+session_start();
 
 $stmt = $conn->prepare("
     SELECT id, role, password, user_id
@@ -55,7 +62,7 @@ if (!password_verify($password, $u['password'])) {
 
 /* ---------------- SESSION SET ---------------- */
 $_SESSION['user_id'] = $u['id'];
-$_SESSION['role']    = $u['role'];
+$_SESSION['role'] = $u['role'];
 
 /* ✅ IMPORTANT: MEMBER SESSION */
 if ($u['role'] === 'member') {
@@ -76,8 +83,8 @@ if ($u['role'] === 'member') {
     }
 
     $_SESSION['member_id'] = $m['member_id'];
-    $_SESSION['name']      = $m['full_name'];
-    $_SESSION['email']     = $m['email'];
+    $_SESSION['name'] = $m['full_name'];
+    $_SESSION['email'] = $m['email'];
 }
 
 /* ---------------- DONE ---------------- */

@@ -1,10 +1,12 @@
 <?php
+session_name('chitfund_admin');
 session_start();
 include '../../config/database.php';
 
-if ($_SESSION['role'] !== 'admin') die("Unauthorized");
+if ($_SESSION['role'] !== 'admin')
+    die("Unauthorized");
 
-$groupId = (int)$_GET['group_id'];
+$groupId = (int) $_GET['group_id'];
 $memberId = $_GET['member_id'];
 
 $stmt = $conn->prepare("

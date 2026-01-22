@@ -129,7 +129,7 @@
         <!-- ROLE SWITCH -->
         <div class="role-switch">
             <button id="adminBtn" class="active">Admin</button>
-            <button id="memberBtn">Member</button>c
+            <button id="memberBtn">Member</button>
         </div>
 
         <form id="loginForm">

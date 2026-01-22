@@ -1,4 +1,5 @@
 <?php
+session_name('chitfund_admin');
 session_start();
 include '../../config/database.php';
 
@@ -6,11 +7,11 @@ if ($_SESSION['role'] !== 'admin') {
     die('Unauthorized');
 }
 
-$groupId    = (int)$_POST['chit_group_id'];
+$groupId = (int) $_POST['chit_group_id'];
 $startTime = $_POST['auction_datetime'];
-$endTime   = $_POST['auction_end_datetime'];
-$startBid  = (int)$_POST['starting_bid_amount'];
-$status    = $_POST['status'];
+$endTime = $_POST['auction_end_datetime'];
+$startBid = (int) $_POST['starting_bid_amount'];
+$status = $_POST['status'];
 $auctionType = $_POST['auction_type']; // fetched automatically
 
 
@@ -43,10 +44,10 @@ $stmt = $conn->prepare("
 $stmt->bind_param("i", $groupId);
 $stmt->execute();
 
-$month = (int)$stmt->get_result()->fetch_assoc()['next_month'];
+$month = (int) $stmt->get_result()->fetch_assoc()['next_month'];
 
 /* ❌ Prevent exceeding duration */
-if ($month > (int)$group['duration_months']) {
+if ($month > (int) $group['duration_months']) {
     die(
         "Cannot create auction. 
          Maximum {$group['duration_months']} months already scheduled."

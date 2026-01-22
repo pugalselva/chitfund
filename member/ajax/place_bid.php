@@ -1,10 +1,11 @@
 <?php
+session_name('chitfund_member');
 session_start();
 include '../../config/database.php';
 
 $auction_id = $_POST['auction_id'];
-$bid_amount = (int)$_POST['bid_amount'];
-$member_id  = $_SESSION['member_id'];
+$bid_amount = (int) $_POST['bid_amount'];
+$member_id = $_SESSION['member_id'];
 
 /* Check auction active */
 $q = $conn->query("

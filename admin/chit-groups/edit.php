@@ -1,4 +1,5 @@
 <?php
+session_name('chitfund_admin');
 session_start();
 include '../../config/database.php';
 
@@ -38,7 +39,7 @@ $members = $conn->query("
 
     <link rel="stylesheet" href="../../assets/css/style.css">
     <style>
-                /* ===============================
+        /* ===============================
         LAYOUT
         ================================ */
         .content {
@@ -157,7 +158,7 @@ $members = $conn->query("
         }
 
 
-                /* ===============================
+        /* ===============================
         SEARCH
         ================================ */
         #search {
@@ -298,13 +299,13 @@ $members = $conn->query("
                             </thead>
                             <tbody id="memberTable">
                                 <?php while ($m = $members->fetch_assoc()): ?>
-                                <tr>
-                                    <td>
-                                        <input type="checkbox" name="members[]" value="<?= $m['member_id'] ?>">
-                                    </td>
-                                    <td><?= $m['member_id'] ?></td>
-                                    <td><?= htmlspecialchars($m['full_name']) ?></td>
-                                </tr>
+                                    <tr>
+                                        <td>
+                                            <input type="checkbox" name="members[]" value="<?= $m['member_id'] ?>">
+                                        </td>
+                                        <td><?= $m['member_id'] ?></td>
+                                        <td><?= htmlspecialchars($m['full_name']) ?></td>
+                                    </tr>
                                 <?php endwhile; ?>
                             </tbody>
                         </table>
@@ -331,9 +332,9 @@ $members = $conn->query("
             e.preventDefault();
 
             fetch('add-members.php', {
-                    method: 'POST',
-                    body: new FormData(e.target)
-                })
+                method: 'POST',
+                body: new FormData(e.target)
+            })
                 .then(r => r.text())
                 .then(res => {
                     if (res === 'success') {

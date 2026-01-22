@@ -1,4 +1,5 @@
 <?php
+session_name('chitfund_admin');
 session_start();
 include '../../config/database.php';
 
@@ -6,7 +7,7 @@ if ($_SESSION['role'] !== 'admin') {
     die("Unauthorized");
 }
 
-$id = (int)$_POST['id'];
+$id = (int) $_POST['id'];
 $value = trim($_POST['setting_value']);
 $isActive = isset($_POST['is_active']) ? 1 : 0;
 
@@ -20,4 +21,4 @@ $stmt->execute();
 
 header("Location: index.php?updated=1");
 exit;
-    ?>  
+?>

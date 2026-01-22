@@ -1,10 +1,12 @@
 <?php
+session_name('chitfund_admin');
 session_start();
 include '../../config/database.php';
 
-if ($_SESSION['role'] !== 'admin') exit("Unauthorized");
+if ($_SESSION['role'] !== 'admin')
+    exit("Unauthorized");
 
-$groupId = (int)$_POST['group_id'];
+$groupId = (int) $_POST['group_id'];
 $members = $_POST['members'] ?? [];
 
 /* Get group limit */

@@ -1,15 +1,28 @@
 <?php
-session_start();
+include 'auth.php';
 include '../config/database.php';
-
-if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'member') {
-    header('Location: ../index.php');
-    exit();
-}
 
 $name = $_SESSION['name'] ?? 'Member';
 $email = $_SESSION['email'] ?? '';
+
+$userId = $_SESSION['user_id'];
+
+/* Fetch member details */
+$stmt = $conn->prepare("
+    SELECT *
+    FROM members
+    WHERE user_id = ?
+    LIMIT 1
+");
+$stmt->bind_param('i', $userId);
+$stmt->execute();
+$member = $stmt->get_result()->fetch_assoc();
+
+if (!$member) {
+    die('Member record not found');
+}
 ?>
+
 
 <!DOCTYPE html>
 <html>
@@ -18,6 +31,12 @@ $email = $_SESSION['email'] ?? '';
     <title>Profile</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="../assets/css/style.css">
+    <style>
+        .form-msg {
+            margin-top: 10px;
+            font-size: 13px;
+        }
+    </style>
 </head>
 
 <body>
@@ -26,7 +45,7 @@ $email = $_SESSION['email'] ?? '';
         <?php include 'layout/sidebar.php'; ?>
         <div class="main">
             <div class="topbar">
-               <div>
+                <div>
                     <div class="page-title">Profile</div>
                     <div class="page-subtitle">Manage your account information</div>
                 </div>
@@ -47,58 +66,104 @@ $email = $_SESSION['email'] ?? '';
                 <div class="profile-card">
                     <h4>Personal Information</h4>
 
-                    <form method="post">
+                    <form id="profileForm">
                         <div class="form-group">
                             <label>Full Name</label>
-                            <input type="text" value="Member User">
+                            <input type="text" name="full_name" value="<?= htmlspecialchars($member['full_name']) ?>"
+                                required>
                         </div>
 
                         <div class="form-group">
                             <label>Email</label>
-                            <input type="email" value="member@chitfund.com">
+                            <input type="email" name="email" value="<?= htmlspecialchars($member['email']) ?>">
                         </div>
 
                         <div class="form-group">
-                            <label>Phone Number</label>
-                            <input type="text" value="+1 234 567 8900">
+                            <label>Mobile</label>
+                            <input type="text" name="mobile" value="<?= htmlspecialchars($member['mobile']) ?>"
+                                required>
                         </div>
 
                         <div class="form-group">
                             <label>Address</label>
-                            <input type="text" value="123 Main St, City, State 12345">
+                            <input type="text" name="address" value="<?= htmlspecialchars($member['address']) ?>">
                         </div>
 
-                        <button class="btn-dark">Save Changes</button>
+                        <button type="submit" class="btn-dark">Save Changes</button>
+                        <div class="form-msg" id="profileMsg"></div>
                     </form>
                 </div>
+
 
                 <!-- CHANGE PASSWORD -->
                 <div class="profile-card">
                     <h4>Change Password</h4>
 
-                    <form method="post">
+                    <form id="passwordForm">
                         <div class="form-group">
                             <label>Current Password</label>
-                            <input type="password">
+                            <input type="password" name="current_password" required>
                         </div>
 
                         <div class="form-group">
                             <label>New Password</label>
-                            <input type="password">
+                            <input type="password" name="new_password" required>
                         </div>
 
                         <div class="form-group">
-                            <label>Confirm New Password</label>
-                            <input type="password">
+                            <label>Confirm Password</label>
+                            <input type="password" name="confirm_password" required>
                         </div>
 
-                        <button class="btn-dark">Update Password</button>
+                        <button type="submit" class="btn-dark">Update Password</button>
+                        <div class="form-msg" id="passwordMsg"></div>
                     </form>
                 </div>
+
 
             </div>
         </div>
     </div>
+    <!-- script -->
+    <script>
+        /* =====================
+       UPDATE PROFILE
+    ===================== */
+        document.getElementById('profileForm').addEventListener('submit', e => {
+            e.preventDefault();
+
+            fetch('ajax/update-profile.php', {
+                method: 'POST',
+                body: new FormData(e.target)
+            })
+                .then(res => res.json())
+                .then(data => {
+                    const msg = document.getElementById('profileMsg');
+                    msg.innerText = data.message;
+                    msg.style.color = data.status ? 'green' : 'red';
+                });
+        });
+
+        /* =====================
+           CHANGE PASSWORD
+        ===================== */
+        document.getElementById('passwordForm').addEventListener('submit', e => {
+            e.preventDefault();
+
+            fetch('ajax/change-password.php', {
+                method: 'POST',
+                body: new FormData(e.target)
+            })
+                .then(res => res.json())
+                .then(data => {
+                    const msg = document.getElementById('passwordMsg');
+                    msg.innerText = data.message;
+                    msg.style.color = data.status ? 'green' : 'red';
+
+                    if (data.status) e.target.reset();
+                });
+        });
+    </script>
 
 </body>
 

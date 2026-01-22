@@ -1,4 +1,5 @@
 <?php
+session_name('chitfund_admin');
 session_start();
 include '../../config/database.php';
 
@@ -17,17 +18,17 @@ $s = $conn->query("
 ")->fetch_assoc();
 
 if ($s) {
-    $commission = (int)$s['setting_value'];
+    $commission = (int) $s['setting_value'];
 }
 
 /* Collect form data */
-$groupName    = $_POST['group_name'];
-$totalMembers = (int)$_POST['total_members'];
-$duration     = (int)$_POST['duration'];
-$auctionType  = $_POST['auction_type'];
-$startDate    = $_POST['start_date'];
-$status       = $_POST['status'];
-$isActive     = isset($_POST['is_active']) ? 1 : 0;
+$groupName = $_POST['group_name'];
+$totalMembers = (int) $_POST['total_members'];
+$duration = (int) $_POST['duration'];
+$auctionType = $_POST['auction_type'];
+$startDate = $_POST['start_date'];
+$status = $_POST['status'];
+$isActive = isset($_POST['is_active']) ? 1 : 0;
 
 /* Generate group code */
 $groupCode = 'CG' . time();

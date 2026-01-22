@@ -10,7 +10,7 @@ $payments = $conn->query("
     JOIN members m ON m.member_id = p.member_id
     JOIN chit_groups g ON g.id = p.chit_group_id
     ORDER BY p.created_at DESC
-");    
+");
 // summary data can be calculated here or in the HTML section
 $summary = $conn
     ->query(
@@ -39,20 +39,40 @@ $summary = $conn
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="../../assets/css/style.css">
     <style>
-    .pagination button {
-        padding: 6px 10px;
-        margin: 0 3px;
-        border: 1px solid #ddd;
-        background: #fff;
-        cursor: pointer;
-        border-radius: 6px;
-    }
+        .pagination button {
+            padding: 6px 10px;
+            margin: 0 3px;
+            border: 1px solid #ddd;
+            background: #fff;
+            cursor: pointer;
+            border-radius: 6px;
+        }
 
-    .pagination button.active {
-        background: #2563eb;
-        color: #fff;
-        border-color: #2563eb;
-    }
+        .pagination button.active {
+            background: #2563eb;
+            color: #fff;
+            border-color: #2563eb;
+        }
+        .tabs {
+    display: flex;
+    gap: 14px;
+    margin-bottom: 15px;
+}
+
+.tabs span {
+    cursor: pointer;
+    padding: 6px 14px;
+    border-radius: 999px;
+    background: #f1f5f9;
+    font-size: 13px;
+    transition: all 0.25s ease;
+}
+
+.tabs span.active {
+    background: #2563eb;
+    color: #fff;
+}
+
     </style>
 </head>
 
@@ -94,7 +114,6 @@ $summary = $conn
                         <small><?= $summary['overdue_count'] ?> payment</small>
                     </div>
                 </div>
-
                 <a href="create.php">
                     <button class="btn-primary">＋ Record Payment</button>
                 </a>
@@ -209,172 +228,162 @@ $summary = $conn
 
 </body>
 
-</html>
-<script>
-function filterPayments(status, el) {
-    // remove active class from all tabs
-    document.querySelectorAll('.tabs span').forEach(tab => {
-        tab.classList.remove('active');
-    });
-
-    // add active to clicked tab
-    el.classList.add('active');
-
-    // filter rows
-    document.querySelectorAll('tbody tr').forEach(row => {
-        if (status === 'all' || row.dataset.status === status) {
-            row.style.display = '';
-        } else {
-            row.style.display = 'none';
-        }
-    });
-}
-</script>
-<script>
-function filterPayments(status, el) {
-
-    activeStatusFilter = status;   // ✅ STORE FILTER
-
-    document.querySelectorAll('.tabs span').forEach(tab => {
-        tab.classList.remove('active');
-    });
-    el.classList.add('active');
-
-    currentPage = 1;               // ✅ RESET PAGE
-    renderTable();                 // ✅ RE-RENDER
-}
-</script>
-
-
-<script>
-function openInvoice(receipt) {
-    window.open('invoice.php?receipt=' + receipt, '_blank');
-}
-</script>
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-
-    const tbody = document.getElementById('paymentTableBody');
-    const rows = Array.from(tbody.querySelectorAll('tr'));
-
-    const searchBox = document.getElementById('searchBox');
-    const groupDrop = document.getElementById('groupFilter');
-    const memberDrop = document.getElementById('memberFilter');
-    const perPageEl = document.getElementById('perPage');
-    const pagination = document.getElementById('pagination');
-
-    let currentPage = 1;
-
-    /* 🔐 Restore page size */
-    let perPage = localStorage.getItem('payments_per_page') || perPageEl.value;
-    perPageEl.value = perPage;
-
-    function getFilteredRows() {
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+    
+            const tbody = document.getElementById('paymentTableBody');
+            const allRows = Array.from(tbody.querySelectorAll('tr'));
+    
+            const searchBox = document.getElementById('searchBox');
+            const groupDrop = document.getElementById('groupFilter');
+            const memberDrop = document.getElementById('memberFilter');
+            const perPageEl = document.getElementById('perPage');
+            const pagination = document.getElementById('pagination');
+    
+            /* GLOBAL STATE */
+            let activeStatusFilter = 'all';
+            let currentPage = 1;
+            let perPage = Number(perPageEl.value);
+    
+            /* =========================
+               CORE FILTER PIPELINE
+            ========================= */
+            function getFilteredRows() {
                 const search = searchBox.value.toLowerCase();
                 const group = groupDrop.value.toLowerCase();
-
-                return rows.filter(row => {
+                const member = memberDrop.value.toLowerCase();
+    
+                return allRows.filter(row => {
+    
+                    /* STATUS FILTER */
+                    if (activeStatusFilter !== 'all' &&
+                        row.dataset.status !== activeStatusFilter) {
+                        return false;
+                    }
+    
                     const text = row.innerText.toLowerCase();
-                    const groupName = row.children[0].innerText.toLowerCase(); // Group column
-                    return text.includes(search) && (!group || groupName.includes(group));
+                    const groupName = row.children[2].innerText.toLowerCase();
+                    const memberName = row.children[1].innerText.toLowerCase();
+    
+                    return (
+                        text.includes(search) &&
+                        (!group || groupName.includes(group)) &&
+                        (!member || memberName.includes(member))
+                    );
                 });
             }
-
-
-    function renderTable() {
-        const filtered = getFilteredRows();
-        const totalPages = Math.ceil(filtered.length / perPage) || 1;
-
-        currentPage = Math.min(currentPage, totalPages);
-
-        rows.forEach(r => r.style.display = 'none');
-
-        filtered
-            .slice((currentPage - 1) * perPage, currentPage * perPage)
-            .forEach(r => r.style.display = '');
-
-        renderPagination(totalPages);
-    }
-
-    function renderPagination(totalPages) {
+    
+            /* =========================
+               RENDER TABLE
+            ========================= */
+            function renderTable() {
+    
+                const filtered = getFilteredRows();
+                const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
+                currentPage = Math.min(currentPage, totalPages);
+    
+                /* Clear table */
+                allRows.forEach(r => r.style.display = 'none');
+    
+                /* Show rows */
+                filtered
+                    .slice((currentPage - 1) * perPage, currentPage * perPage)
+                    .forEach(r => r.style.display = '');
+    
+                renderPagination(totalPages);
+            }
+    
+            /* =========================
+               PAGINATION
+            ========================= */
+            function renderPagination(totalPages) {
                 pagination.innerHTML = '';
-
-                const createBtn = (label, page, active = false, disabled = false) => {
-                    const btn = document.createElement('button');
-                    btn.textContent = label;
-
-                    if (active) btn.classList.add('active');
-                    if (disabled) btn.disabled = true;
-
-                    btn.onclick = () => {
-                        if (!disabled) {
-                            currentPage = page;
-                            renderTable();
-                        }
+    
+                const btn = (label, page, active = false) => {
+                    const b = document.createElement('button');
+                    b.textContent = label;
+                    if (active) b.classList.add('active');
+                    b.onclick = () => {
+                        currentPage = page;
+                        renderTable();
                     };
-                    return btn;
+                    return b;
                 };
-
-                /* PREV */
+    
                 if (currentPage > 1) {
-                    pagination.appendChild(createBtn('‹ Prev', currentPage - 1));
+                    pagination.appendChild(btn('‹ Prev', currentPage - 1));
                 }
-
-                const range = 1; // pages around current
-                let start = Math.max(2, currentPage - range);
-                let end = Math.min(totalPages - 1, currentPage + range);
-
-                /* FIRST PAGE */
-                pagination.appendChild(createBtn(1, 1, currentPage === 1));
-
-                /* LEFT ELLIPSIS */
-                if (start > 2) {
-                    pagination.appendChild(createBtn('…', 0, false, true));
+    
+                for (let i = 1; i <= totalPages; i++) {
+                    pagination.appendChild(btn(i, i, i === currentPage));
                 }
-
-                /* MIDDLE PAGES */
-                for (let i = start; i <= end; i++) {
-                    pagination.appendChild(createBtn(i, i, i === currentPage));
-                }
-
-                /* RIGHT ELLIPSIS */
-                if (end < totalPages - 1) {
-                    pagination.appendChild(createBtn('…', 0, false, true));
-                }
-
-                /* LAST PAGE */
-                if (totalPages > 1) {
-                    pagination.appendChild(
-                        createBtn(totalPages, totalPages, currentPage === totalPages)
-                    );
-                }
-
-                /* NEXT */
+    
                 if (currentPage < totalPages) {
-                    pagination.appendChild(createBtn('Next ›', currentPage + 1));
+                    pagination.appendChild(btn('Next ›', currentPage + 1));
                 }
             }
-
-
-
-            /* EVENTS */
+    
+            /* =========================
+               TAB FILTER (GLOBAL)
+            ========================= */
+            window.filterPayments = function(status, el) {
+                activeStatusFilter = status;
+                currentPage = 1;
+    
+                document.querySelectorAll('.tabs span')
+                    .forEach(t => t.classList.remove('active'));
+                el.classList.add('active');
+    
+                renderTable();
+            };
+    
+            /* =========================
+               EVENTS
+            ========================= */
+            searchBox.oninput = () => {
+                currentPage = 1;
+                renderTable();
+            };
+    
+            groupDrop.onchange = memberDrop.onchange = () => {
+                currentPage = 1;
+                renderTable();
+            };
+    
             perPageEl.onchange = () => {
-                perPage = perPageEl.value;
-                localStorage.setItem('auction_per_page', perPage);
+                perPage = Number(perPageEl.value);
                 currentPage = 1;
                 renderTable();
             };
-
-            searchBox.onkeyup = () => {
-                currentPage = 1;
-                renderTable();
-            };
-
-            groupDrop.onchange = () => {
-                currentPage = 1;
-                renderTable();
-            };
-
-            renderTable(); // init
+    
+            /* INIT */
+            renderTable();
         });
+    </script>
+
+<script>
+    function filterPayments(status, el) {
+        // remove active class from all tabs
+        document.querySelectorAll('.tabs span').forEach(tab => {
+            tab.classList.remove('active');
+        });
+
+        // add active to clicked tab
+        el.classList.add('active');
+
+        // filter rows
+        document.querySelectorAll('tbody tr').forEach(row => {
+            if (status === 'all' || row.dataset.status === status) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+
+    function openInvoice(receipt) {
+        window.open('invoice.php?receipt=' + receipt, '_blank');
+    }
 </script>
+
+</html>

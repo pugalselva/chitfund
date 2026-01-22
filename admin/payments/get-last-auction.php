@@ -1,4 +1,5 @@
 <?php
+session_name('chitfund_admin');
 session_start();
 include '../../config/database.php';
 
@@ -7,7 +8,7 @@ if ($_SESSION['role'] !== 'admin') {
     exit;
 }
 
-$groupId = (int)($_GET['group_id'] ?? 0);
+$groupId = (int) ($_GET['group_id'] ?? 0);
 if (!$groupId) {
     echo json_encode(['amount' => 0]);
     exit;
@@ -39,7 +40,7 @@ $perMember = round($row['winning_bid_amount'] / $row['total_members']);
 
 echo json_encode([
     'per_member' => $perMember,
-    'total'      => $row['winning_bid_amount'],
-    'members'    => $row['total_members']
+    'total' => $row['winning_bid_amount'],
+    'members' => $row['total_members']
 ]);
 ?>
