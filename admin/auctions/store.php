@@ -75,6 +75,42 @@ $stmt->bind_param(
 
 $stmt->execute();
 
+/* 📨 SEND SMS NOTIFICATION */
+$members = $conn->query("
+    SELECT m.mobile, m.full_name, cg.group_name 
+    FROM chit_group_members cgm
+    JOIN members m ON m.member_id = cgm.member_id
+    JOIN chit_groups cg ON cg.id = cgm.group_id
+    WHERE cgm.group_id = $groupId
+");
+
+while ($mem = $members->fetch_assoc()) {
+    $mobile = $mem['mobile'];
+    $msg = "📢 New Auction Alert!
+Group: {$mem['group_name']}
+Month: $month
+Date: " . date('d M Y h:i A', strtotime($startTime)) . "
+Log in to participate!";
+
+    // Send SMS 
+    sendSMS($mobile, $msg);
+}
+
+function sendSMS($mobile, $message)
+{
+    // 1. Log to file for testing
+    $log = "[" . date('Y-m-d H:i:s') . "] To: $mobile | Msg: $message" . PHP_EOL;
+    file_put_contents('../../sms_logs.txt', $log, FILE_APPEND);
+
+    // 2. Real API Implementation - UNCOMMENT AND FILL THIS
+    /*
+    // Example: Fast2SMS, Twilio, etc.
+    // $apiKey = "YOUR_API_KEY";
+    // $url = "https://www.fast2sms.com/dev/bulkV2?authorization=$apiKey&route=q&message=".urlencode($message)."&flash=0&numbers=$mobile";
+    // file_get_contents($url);
+    */
+}
+
 header("Location: index.php?success=1");
 exit;
 

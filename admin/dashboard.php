@@ -106,7 +106,7 @@ $pageTitle = 'Dashboard';
 <head>
     <title>Admin Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    
+
     <link rel="stylesheet" href="../assets/css/style.css">
 </head>
 
@@ -121,7 +121,7 @@ $pageTitle = 'Dashboard';
                     <div class="page-title">Dashboard</div>
                 </div>
 
-                <?php include 'layout/header.php'; ?>
+                <?php include './layout/header.php'; ?>
             </div>
 
 
@@ -162,16 +162,16 @@ $pageTitle = 'Dashboard';
                         <h4>Recent Auctions</h4><br>
 
                         <?php if ($recentAuctions->num_rows === 0): ?>
-                        <small>No completed auctions</small>
+                            <small>No completed auctions</small>
                         <?php endif; ?>
 
-                        <?php while($a = $recentAuctions->fetch_assoc()): ?>
-                        <b><?= htmlspecialchars($a['group_name']) ?> – Month <?= $a['auction_month'] ?></b><br>
-                        <small>
-                            Winner: <?= htmlspecialchars($a['full_name'] ?? '—') ?>
-                            ₹<?= number_format($a['winning_bid_amount'] ?? 0) ?>
-                        </small>
-                        <hr style="margin:10px 0;">
+                        <?php while ($a = $recentAuctions->fetch_assoc()): ?>
+                            <b><?= htmlspecialchars($a['group_name']) ?> – Month <?= $a['auction_month'] ?></b><br>
+                            <small>
+                                Winner: <?= htmlspecialchars($a['full_name'] ?? '—') ?>
+                                ₹<?= number_format($a['winning_bid_amount'] ?? 0) ?>
+                            </small>
+                            <hr style="margin:10px 0;">
                         <?php endwhile; ?>
                     </div>
 
@@ -180,22 +180,22 @@ $pageTitle = 'Dashboard';
                         <h4>Recent Payments</h4><br>
 
                         <?php if ($recentPayments->num_rows === 0): ?>
-                        <small>No payments yet</small>
+                            <small>No payments yet</small>
                         <?php endif; ?>
 
-                        <?php while($p = $recentPayments->fetch_assoc()): ?>
-                        <b><?= htmlspecialchars($p['full_name']) ?></b> – ₹<?= number_format($p['final_amount']) ?><br>
-                        <small><?= date('d M Y', strtotime($p['payment_date'])) ?></small>
-                        <hr style="margin:10px 0;">
+                        <?php while ($p = $recentPayments->fetch_assoc()): ?>
+                            <b><?= htmlspecialchars($p['full_name']) ?></b> – ₹<?= number_format($p['final_amount']) ?><br>
+                            <small><?= date('d M Y', strtotime($p['payment_date'])) ?></small>
+                            <hr style="margin:10px 0;">
                         <?php endwhile; ?>
                     </div>
                 </div>
                 <?php if ($pendingPayments > 0): ?>
-                <div class="alert">
-                    <i class="fa-solid fa-triangle-exclamation fa-shake"></i>
-                    💰 <b>You have <?= $pendingPayments ?> pending payment(s)</b><br>
-                    Please follow up with members
-                </div>
+                    <div class="alert">
+                        <i class="fa-solid fa-triangle-exclamation fa-shake"></i>
+                        💰 <b>You have <?= $pendingPayments ?> pending payment(s)</b><br>
+                        Please follow up with members
+                    </div>
                 <?php endif; ?>
             </div>
         </div>

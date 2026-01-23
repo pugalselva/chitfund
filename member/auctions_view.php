@@ -40,7 +40,7 @@ $result = $stmt->get_result();
 
 <body>
 
-    <div class="wrapper">
+    <div class="wrapper" data-server-time="<?= time() * 1000 ?>">
         <?php include 'layout/sidebar.php'; ?>
         <div class="main">
             <div class="topbar">
@@ -147,13 +147,45 @@ $result = $stmt->get_result();
     <script>
         /* Update countdown immediately, then every 1 second */
         function updateCountdowns() {
+            // Get initial server time and calculate offset
+            const serverTimeStr = document.querySelector('.wrapper').dataset.serverTime;
+            const serverTimeInitial = parseInt(serverTimeStr);
+            const clientTimeInitial = Date.now();
+            const timeOffset = serverTimeInitial - clientTimeInitial; // Sync offset
+
+            // Function to get current synchronized time
+            const getSyncTime = () => Date.now() + timeOffset;
+
+            // We need to keep updating, so we move the logic inside the interval or use a closure
+            // Better: redefine the update function to use the closure offset, 
+            // but for simplicity, let's just calculate offset once globally if possible, 
+            // or just use valid diff inside loop.
+
+            // Actually, let's just make the offset global or recalculate simpler.
+            // Let's use a simpler approach: 
+            // We'll calculate the "current server time" by adding elapsed time since page load to the initial server time.
+
+            // Let's put the offset logic outside.
+        }
+
+        const serverTimeInitial = parseInt(document.querySelector('.wrapper').dataset.serverTime);
+        const performanceStart = performance.now();
+
+        function getCurrentServerTime() {
+            const elapsed = performance.now() - performanceStart;
+            return serverTimeInitial + elapsed;
+        }
+
+        function updateCountdowns() {
+            const now = getCurrentServerTime();
+
             document.querySelectorAll('tbody tr').forEach(row => {
                 const start = row.dataset.start * 1000;
                 const end = row.dataset.end * 1000;
-                const now = Date.now();
+
                 const cell = row.querySelector('.countdown');
                 const statusCell = row.querySelector('.badge');
-                const actionCell = row.querySelector('td:last-child');
+                // const actionCell = row.querySelector('td:last-child'); // We are not updating action cell via JS dynamically yet, but we could reload or just rely on the reload interval.
 
                 if (now < start) {
                     cell.innerText = 'Starts in ' + format(start - now);
