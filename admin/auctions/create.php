@@ -20,192 +20,147 @@ $groups = $conn->query("
 
 <head>
     <title>Create Auction</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="../../assets/css/style.css">
     <style>
-        .grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
+        .member-list-card {
+            height: 100%;
+            background: #f8fafc;
         }
 
-        .member-box {
-            border: 1px solid #e5e7eb;
-            padding: 12px;
-            border-radius: 8px;
+        .member-list-scroll {
+            max-height: 400px;
+            overflow-y: auto;
         }
-
-        .member {
-            padding: 6px 0;
-            border-bottom: 1px dashed #ddd;
-        }
-        /* Member Panel */
-.member-panel {
-    background: #fff;
-    border-radius: 10px;
-    padding: 16px;
-    height: 100%;
-}
-
-.member-panel h4 {
-    font-size: 16px;
-    margin-bottom: 12px;
-}
-
-/* Member List */
-.member-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    max-height: 280px;
-    overflow-y: auto;
-}
-
-/* Member Row */
-.member-list li {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 12px;
-    border-radius: 8px;
-    margin-bottom: 8px;
-    background: #f8fafc;
-    font-size: 14px;
-}
-
-/* Name */
-.member-name {
-    font-weight: 500;
-}
-
-/* Member ID */
-.member-id {
-    color: #64748b;
-    font-size: 12px;
-}
-
-/* Status badge */
-.member-badge {
-    font-size: 11px;
-    padding: 4px 8px;
-    border-radius: 999px;
-}
-
-.member-badge.eligible {
-    background: #dcfce7;
-    color: #166534;
-}
-
-.member-badge.selected {
-    background: #dbeafe;
-    color: #1e40af;
-}
-
-/* Placeholder */
-.member-list .placeholder {
-    color: #94a3b8;
-    font-style: italic;
-    text-align: center;
-    padding: 20px;
-}
-
     </style>
 </head>
 
 <body>
 
-    <div class="wrapper">
+    <div class="d-flex" id="wrapper">
         <?php include '../layout/sidebar.php'; ?>
 
-        <div class="main">
+        <div id="page-content-wrapper">
+            <?php include '../layout/header.php'; ?>
 
-            <div class="topbar">
-                <div>
-                    <div class="page-title">Create Auction</div>
-                    <div class="page-subtitle">Schedule a new auction for chit group</div>
-                </div>
-                <?php include '../layout/header.php'; ?>
-
-            </div>
-
-            <div class="content">
-                <div class="grid">
-                    <div class="form-box" style="max-width:600px;">
-                        <h4>Create Auction</h4>
-
-                        <form method="post" action="store.php">
-
-                            <!-- ✅ CHIT GROUP DROPDOWN -->
-                            <div class="form-group">
-                                <label>Chit Group *</label>
-                                <select class="form-control" name="chit_group_id" id="groupSelect" required>
-                                    <option value="">Select chit group</option>
-                                    <?php while ($g = $groups->fetch_assoc()): ?>
-                                    <option value="<?= $g['id'] ?>">
-                                        <?= htmlspecialchars($g['group_name']) ?>
-                                    </option>
-                                    <?php endwhile; ?>
-                                </select>
-                            </div>
-                            <!-- AUCTION TYPE -->
-                            <div class="form-group">
-                                <label>Auction Type *</label>
-                                <select name="auction_type" id="auctionType" class="form-control" required>
-                                    <option value="">Select auction type</option>
-                                    <option value="Reverse">Reverse (Lowest Bid Wins)</option>
-                                    <option value="Open">Open (Kulukal)</option>
-                                </select>
-                            </div>
-                            <!-- AUCTION DATE -->
-                            <div class="form-group">
-                                <label>Auction Date & Time *</label>
-                                <input type="datetime-local" name="auction_datetime" class="form-control" required>
-                            </div>
-                            <!-- AUCTION END -->
-                            <div class="form-group">
-                                <label>Auction End Date & Time *</label>
-                                <input type="datetime-local" name="auction_end_datetime" class="form-control" required>
-                            </div>
-                            <!-- STARTING BID -->
-                            <div class="form-group">
-                                <label>Starting Bid Amount *</label>
-
-                                <small id="lastBidInfo" style="display:block;color:#6b7280;margin-bottom:6px;">
-                                    Last month bid: —
-                                </small>
-
-                                <input type="number" name="starting_bid_amount" id="startingBid" class="form-control"
-                                    required>
-                            </div>
-
-
-                            <!-- STATUS -->
-                            <div class="form-group">
-                                <label>Status *</label>
-                                <select name="status" class="form-control">
-                                    <option value="upcoming">Upcoming</option>
-                                    <option value="active">Active</option>
-                                </select>
-                            </div>
-
-                            <button class="btn-primary">Create Auction</button>
-                            <a href="index.php" class="btn-secondary">Cancel</a>
-                        </form>
+            <div class="container-fluid p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h4 class="mb-0 fw-bold">Create Auction</h4>
+                        <small class="text-secondary">Schedule a new auction event</small>
                     </div>
-                    <!-- MEMBER PANEL -->
-                    <!-- MEMBER PANEL -->
-                    <div class="form-box member-panel">
-                        <h4>Member List</h4>
+                    <a href="index.php" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-arrow-left me-1"></i> Back
+                    </a>
+                </div>
 
-                        <ul id="memberList" class="member-list">
-                            <li class="placeholder">Select chit group to view members</li>
-                        </ul>
+                <div class="row g-4">
+
+                    <!-- Left: Form -->
+                    <div class="col-12 col-lg-7">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-header bg-white border-bottom-0 pt-4 pb-0">
+                                <h5 class="card-title fw-bold text-primary"><i class="fas fa-gavel me-2"></i>Auction
+                                    Details</h5>
+                            </div>
+                            <div class="card-body p-4">
+                                <form method="post" action="store.php">
+
+                                    <div class="form-floating mb-3">
+                                        <select class="form-select" name="chit_group_id" id="groupSelect" required>
+                                            <option value="" selected disabled>Select Group</option>
+                                            <?php while ($g = $groups->fetch_assoc()): ?>
+                                                <option value="<?= $g['id'] ?>" data-type="<?= $g['auction_type'] ?>">
+                                                    <?= htmlspecialchars($g['group_name']) ?>
+                                                </option>
+                                            <?php endwhile; ?>
+                                        </select>
+                                        <label for="groupSelect">Chit Group *</label>
+                                    </div>
+
+                                    <div class="form-floating mb-3">
+                                        <select name="auction_type" id="auctionType" class="form-select" required>
+                                            <option value="">Select Type</option>
+                                            <option value="Reverse">Reverse (Lowest Bid Wins)</option>
+                                            <option value="Open">Open (Kulukal)</option>
+                                        </select>
+                                        <label for="auctionType">Auction Type *</label>
+                                    </div>
+
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-md-6">
+                                            <div class="form-floating">
+                                                <input type="datetime-local" name="auction_datetime"
+                                                    id="auction_datetime" class="form-control" required>
+                                                <label for="auction_datetime">Start Date & Time *</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-floating">
+                                                <input type="datetime-local" name="auction_end_datetime"
+                                                    id="auction_end_datetime" class="form-control" required>
+                                                <label for="auction_end_datetime">End Date & Time *</label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-floating mb-3">
+                                        <input type="number" name="starting_bid_amount" id="startingBid"
+                                            class="form-control" placeholder="Amount" required>
+                                        <label for="startingBid">Starting Bid Amount (₹) *</label>
+                                    </div>
+
+                                    <div class="alert alert-light border d-flex align-items-center mb-3">
+                                        <i class="fas fa-history text-muted me-2"></i>
+                                        <small class="text-secondary" id="lastBidInfo">Select a group to see last
+                                            month's bid.</small>
+                                    </div>
+
+                                    <div class="form-floating mb-4">
+                                        <select name="status" class="form-select">
+                                            <option value="upcoming">Upcoming</option>
+                                            <option value="active">Active</option>
+                                        </select>
+                                        <label>Initial Status *</label>
+                                    </div>
+
+                                    <div class="d-grid">
+                                        <button class="btn btn-primary fw-bold py-2">
+                                            <i class="fas fa-check-circle me-1"></i> Create Auction
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Member List -->
+                    <div class="col-12 col-lg-5">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-header bg-white border-bottom-0 pt-4 pb-0">
+                                <h5 class="card-title fw-bold text-success"><i class="fas fa-users me-2"></i>Member List
+                                </h5>
+                                <small class="text-secondary">Members in selected group</small>
+                            </div>
+                            <div class="card-body p-0 pt-3">
+                                <ul id="memberList" class="list-group list-group-flush member-list-scroll px-2 pb-2">
+                                    <li class="list-group-item text-center text-muted border-0 py-5">
+                                        <i class="fas fa-layer-group fa-2x mb-3 opacity-25"></i>
+                                        <p>Select a group to load members.</p>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
                     </div>
                 </div>
+
             </div>
         </div>
     </div>
 
-    <!-- script -->
+    <?php include '../layout/scripts.php'; ?>
     <script>
         const groupSelect = document.getElementById('groupSelect');
         const auctionType = document.getElementById('auctionType');
@@ -220,8 +175,8 @@ $groups = $conn->query("
             // set auction type automatically
             auctionType.value = selected.dataset.type || '';
 
-            memberList.innerHTML = '<li>Loading...</li>';
-            lastBidInfo.innerText = 'Last month bid: —';
+            memberList.innerHTML = '<li class="list-group-item text-center text-muted border-0 py-4"><div class="spinner-border text-primary spinner-border-sm me-2"></div>Loading members...</li>';
+            lastBidInfo.innerText = 'Fetching last bid...';
             startingBid.value = '';
 
             if (!groupId) return;
@@ -231,9 +186,20 @@ $groups = $conn->query("
                 .then(res => res.json())
                 .then(data => {
                     memberList.innerHTML = '';
-                    data.forEach(m => {
-                        memberList.innerHTML += `<li>${m.member_id} - ${m.full_name}</li>`;
-                    });
+                    if (data.length === 0) {
+                        memberList.innerHTML = '<li class="list-group-item text-center text-muted border-0 py-4">No members in this group.</li>';
+                    } else {
+                        data.forEach(m => {
+                            memberList.innerHTML += `
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div class="d-flex flex-column">
+                                        <span class="fw-medium text-dark">${m.full_name}</span>
+                                        <small class="text-muted" style="font-size:0.75rem">ID: #${m.member_id}</small>
+                                    </div>
+                                    <span class="badge bg-light text-dark border">Eligible</span>
+                                </li>`;
+                        });
+                    }
                 });
 
             // fetch last bid
@@ -241,8 +207,10 @@ $groups = $conn->query("
                 .then(res => res.text())
                 .then(amount => {
                     if (amount) {
-                        lastBidInfo.innerText = 'Last month bid: ₹' + amount;
+                        lastBidInfo.innerHTML = 'Last month bid: <span class="fw-bold text-dark">₹' + amount + '</span>';
                         startingBid.value = amount;
+                    } else {
+                        lastBidInfo.innerText = 'No previous auction data found.';
                     }
                 });
         });

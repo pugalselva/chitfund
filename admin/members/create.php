@@ -6,205 +6,244 @@ include '../auth.php';
 
 <head>
     <title>Member Enrollment</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="../../assets/css/style.css">
-
 </head>
 
 <body>
 
-    <div class="wrapper">
+    <div class="d-flex" id="wrapper">
         <?php include '../layout/sidebar.php'; ?>
 
-        <div class="main">
+        <div id="page-content-wrapper">
+            <?php include '../layout/header.php'; ?>
 
-            <div class="topbar">
-                <div>
-                    <div class="page-title">Member Enrollment</div>
-                    <div class="page-subtitle">Register a new member with complete details</div>
-                    
-                </div>
-                <?php include '../layout/header.php'; ?>
-            </div>
-
-            <div class="content">
-
-                <!-- STEPPER -->
-                <div class="step-tabs">
-                    <button id="tabPersonal" class="active" onclick="showStep('personal')">
-                        Personal Details
-                    </button>
-                    <button id="tabBank" onclick="showStep('bank')">
-                        Bank Details
-                    </button>
+            <div class="container-fluid p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h4 class="mb-0 fw-bold">Member Enrollment</h4>
+                        <small class="text-secondary">Register a new member to the system</small>
+                    </div>
                 </div>
 
-                <form method="post" action="store.php" enctype="multipart/form-data">
-
-                    <!-- ================= PERSONAL DETAILS ================= -->
-                    <div id="personal" class="step-content active form-box">
-
-                        <h4>Personal Information</h4><br>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Full Name *</label>
-                                <input class="form-control" name="full_name" required>
+                <div class="row justify-content-center">
+                    <div class="col-12 col-xl-10">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header bg-white border-bottom-0 pt-4 pb-0">
+                                <ul class="nav nav-tabs card-header-tabs" id="enrollTabs" role="tablist">
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link active fw-bold" id="personal-tab" data-bs-toggle="tab"
+                                            data-bs-target="#personal" type="button" role="tab">
+                                            <i class="fas fa-user-plus me-2"></i>Personal Details
+                                        </button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link fw-bold" id="bank-tab" data-bs-toggle="tab"
+                                            data-bs-target="#bank" type="button" role="tab">
+                                            <i class="fas fa-university me-2"></i>Bank Details
+                                        </button>
+                                    </li>
+                                </ul>
                             </div>
-                             <div class="form-group">
-        <label>UTR ID *</label>
-        <input class="form-control" name="utr_id" required>
-        <small style="font-size:12px;color:#555;">
-            UTR ID will be used as login password
-        </small>
-    </div>
+
+                            <div class="card-body p-4">
+                                <form method="post" action="store.php" enctype="multipart/form-data">
+
+                                    <div class="tab-content" id="enrollTabsContent">
+
+                                        <!-- PERSONAL DETAILS -->
+                                        <div class="tab-pane fade show active" id="personal" role="tabpanel">
+
+                                            <div class="row g-3 mb-4">
+                                                <div class="col-md-6">
+                                                    <div class="form-floating">
+                                                        <input type="text" class="form-control" name="full_name"
+                                                            id="full_name" placeholder="Full Name" required>
+                                                        <label for="full_name">Full Name *</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-floating">
+                                                        <input type="text" class="form-control" name="utr_id"
+                                                            id="utr_id" placeholder="UTR ID" required>
+                                                        <label for="utr_id">UTR ID *</label>
+                                                    </div>
+                                                    <div class="form-text small"><i class="fas fa-info-circle me-1"></i>
+                                                        UTR ID will be used as the login password</div>
+                                                </div>
+                                            </div>
+
+                                            <div class="row g-3 mb-4">
+                                                <div class="col-md-4">
+                                                    <div class="form-floating">
+                                                        <select class="form-select" name="gender" id="gender" required>
+                                                            <option value="" selected disabled>Select</option>
+                                                            <option>Male</option>
+                                                            <option>Female</option>
+                                                            <option>Other</option>
+                                                        </select>
+                                                        <label for="gender">Gender *</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-floating">
+                                                        <input type="date" class="form-control" name="dob" id="dob"
+                                                            required>
+                                                        <label for="dob">Date of Birth *</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-floating">
+                                                        <input type="text" class="form-control" name="mobile"
+                                                            id="mobile" placeholder="Mobile" required>
+                                                        <label for="mobile">Mobile Number *</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-floating mb-4">
+                                                <textarea class="form-control" name="address" id="address"
+                                                    placeholder="Address" style="height: 100px" required></textarea>
+                                                <label for="address">Permanent Address *</label>
+                                            </div>
+
+                                            <div class="row g-3 mb-4">
+                                                <div class="col-md-6">
+                                                    <div class="form-floating">
+                                                        <input type="text" class="form-control" name="aadhaar"
+                                                            id="aadhaar" placeholder="Aadhaar" required>
+                                                        <label for="aadhaar">Aadhaar Number *</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-floating">
+                                                        <input type="email" class="form-control" name="email" id="email"
+                                                            placeholder="Email">
+                                                        <label for="email">Email Address (Optional)</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="row g-3 mb-4">
+                                                <div class="col-md-6">
+                                                    <div class="form-floating">
+                                                        <input type="date" class="form-control" name="joining_date"
+                                                            id="joining_date" required>
+                                                        <label for="joining_date">Joining Date *</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label text-secondary small fw-bold">Profile Photo
+                                                        *</label>
+                                                    <input type="file" class="form-control" name="photo">
+                                                </div>
+                                            </div>
+
+                                            <div class="form-check form-switch mb-4">
+                                                <input class="form-check-input" type="checkbox" role="switch"
+                                                    name="status" id="status" value="1" checked>
+                                                <label class="form-check-label" for="status">Activate Account
+                                                    Immediately</label>
+                                            </div>
+
+                                            <div class="d-flex justify-content-end">
+                                                <button type="button" class="btn btn-primary px-4"
+                                                    onclick="switchTab('#bank-tab')">
+                                                    Next: Bank Details <i class="fas fa-arrow-right ms-2"></i>
+                                                </button>
+                                            </div>
+
+                                        </div>
+
+                                        <!-- BANK DETAILS -->
+                                        <div class="tab-pane fade" id="bank" role="tabpanel">
+
+                                            <div class="row g-3 mb-4">
+                                                <div class="col-md-6">
+                                                    <div class="form-floating">
+                                                        <input type="text" class="form-control" name="acc_name"
+                                                            id="acc_name" placeholder="Holder Name" required>
+                                                        <label for="acc_name">Account Holder Name *</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-floating">
+                                                        <input type="text" class="form-control" name="acc_no"
+                                                            id="acc_no" placeholder="Account No" required>
+                                                        <label for="acc_no">Account Number *</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="row g-3 mb-4">
+                                                <div class="col-md-4">
+                                                    <div class="form-floating position-relative">
+                                                        <input type="text" class="form-control" name="ifsc" id="ifsc"
+                                                            placeholder="IFSC" required onblur="validateIFSC()">
+                                                        <label for="ifsc">IFSC Code *</label>
+                                                        <div id="ifscMsg" class="form-text position-absolute"
+                                                            style="top: 100%; font-size: 0.75rem;"></div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-floating">
+                                                        <input type="text" class="form-control bg-light"
+                                                            name="bank_name" id="bank_name" placeholder="Bank Name"
+                                                            readonly required>
+                                                        <label for="bank_name">Bank Name (Auto)</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-floating">
+                                                        <input type="text" class="form-control" name="upi" id="upi"
+                                                            placeholder="UPI ID">
+                                                        <label for="upi">UPI ID (Optional)</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="mb-5">
+                                                <label class="form-label text-secondary small fw-bold">Cancelled Cheque
+                                                    / Passbook *</label>
+                                                <input type="file" class="form-control" name="bank_doc" required>
+                                            </div>
+
+                                            <div class="d-flex justify-content-between">
+                                                <button type="button" class="btn btn-outline-secondary"
+                                                    onclick="switchTab('#personal-tab')">
+                                                    <i class="fas fa-arrow-left ms-2"></i> Back
+                                                </button>
+                                                <div class="d-flex gap-2">
+                                                    <a href="index.php" class="btn btn-light border">Cancel</a>
+                                                    <button type="submit" class="btn btn-primary px-4 fw-bold">
+                                                        <i class="fas fa-check-circle me-2"></i> Enroll Member
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+                                </form>
+                            </div>
                         </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Gender *</label>
-                                <select class="form-control" name="gender" required>
-                                    <option value="">Select</option>
-                                    <option>Male</option>
-                                    <option>Female</option>
-                                </select>
-                            </div>
-
-                            <div class="form-group">
-                                <label>Date of Birth *</label>
-                                <input type="date" class="form-control" name="dob" required>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Permanent Address *</label>
-                            <textarea class="form-control" name="address" required></textarea>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Aadhaar Number *</label>
-                                <input class="form-control" name="aadhaar" required>
-                            </div>
-
-                            <div class="form-group">
-                                <label>Mobile Number *</label>
-                                <input class="form-control" name="mobile" required>
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Email (Optional)</label>
-                                <input class="form-control" name="email">
-                            </div>
-
-                            <div class="form-group">
-                                <label>Joining Date *</label>
-                                <input type="date" class="form-control" name="joining_date" required>
-                            </div>
-                        </div>
-
-                        <!-- <div class="form-row">
-                            <div class="form-group">
-                                <label>Password *</label>
-                                <input type="password" class="form-control" name="password" required>
-                            </div>
-
-                            <div class="form-group">
-                                <label>Confirm Password *</label>
-                                <input type="password" class="form-control" name="confirm_password" required>
-                            </div>
-                        </div> -->
-                        <div class="form-group">
-                            <label>Upload Photo *</label>
-                            <input type="file" class="form-control" name="photo">
-                        </div>
-                        <div class="form-group">
-                            <label>Active Status</label><br><br>
-
-                            <label class="switch">
-                                <input type="checkbox" name="status" value="1" checked>
-                                <span class="slider"></span>
-                            </label>
-
-                            <span style="margin-left:10px;font-size:14px;">
-                                Member is Active
-                            </span>
-                        </div>
-
-
-
-                        <br>
-                        <button type="button" class="btn-primary" onclick="showStep('bank')">
-                            Next → Bank Details
-                        </button>
-
                     </div>
-
-                    <!-- ================= BANK DETAILS ================= -->
-                    <div id="bank" class="step-content form-box">
-
-                        <h4>Bank Account Details</h4><br>
-
-                        <div class="form-group">
-                            <label>Account Holder Name *</label>
-                            <input class="form-control" name="acc_name" required>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Account Number *</label>
-                                <input class="form-control" name="acc_no" required>
-                            </div>
-
-                            <div class="form-group">
-                                <label>Bank Name *</label>
-                                <input class="form-control" name="bank_name" id="bank_name" required readonly>
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>IFSC Code *</label>
-                                <input class="form-control" name="ifsc" id="ifsc" required
-                                    placeholder="e.g. HDFC0000123" onblur="validateIFSC()">
-
-                                <small id="ifscMsg" style="font-size:12px;"></small>
-                            </div>
-
-                            <div class="form-group">
-                                <label>UPI ID (Optional)</label>
-                                <input class="form-control" name="upi">
-                            </div>
-                        </div>
-
-
-                        <div class="form-group">
-                            <label>Cancelled Cheque / Passbook Photo *</label>
-                            <input type="file" class="form-control" name="bank_doc" required>
-                        </div>
-
-                        <br>
-                        <button type="button" class="btn-secondary" onclick="showStep('personal')">
-                            ← Back
-                        </button>
-
-                        <button type="submit" class="btn-primary">
-                            Enroll Member
-                        </button>
-
-                        <a href="index.php">
-                            <button type="button" class="btn-secondary">Cancel</button>
-                        </a>
-
-                    </div>
-
-                </form>
+                </div>
 
             </div>
         </div>
     </div>
-    <!-- script -->
+
+    <?php include '../layout/scripts.php'; ?>
     <script>
+        function switchTab(tabId) {
+            const triggerEl = document.querySelector(tabId);
+            const tab = new bootstrap.Tab(triggerEl);
+            tab.show();
+        }
+
         let ifscValid = false;
 
         function validateIFSC() {
@@ -217,12 +256,13 @@ include '../auth.php';
             // Reset
             msg.textContent = '';
             bankName.value = '';
+            ifscInput.classList.remove('is-valid', 'is-invalid');
             ifscValid = false;
 
             if (!ifsc) return;
 
-            msg.style.color = '#6b7280';
-            msg.textContent = 'Validating IFSC...';
+            msg.className = 'form-text text-muted';
+            msg.textContent = 'Validating...';
 
             fetch(`https://ifsc.razorpay.com/${ifsc}`)
                 .then(res => {
@@ -231,46 +271,34 @@ include '../auth.php';
                 })
                 .then(data => {
                     bankName.value = data.BANK;
-                    msg.textContent = `✔ ${data.BANK}, ${data.BRANCH}`;
-                    msg.style.color = '#16a34a';
+                    msg.innerHTML = `<i class="fas fa-check-circle me-1"></i> ${data.BANK}, ${data.BRANCH}`;
+                    msg.className = 'form-text text-success fw-bold';
+                    ifscInput.classList.add('is-valid');
                     ifscValid = true;
                 })
                 .catch(() => {
-                    msg.textContent = '✖ Invalid IFSC Code';
-                    msg.style.color = '#dc2626';
-                    ifscInput.focus();
+                    msg.innerHTML = `<i class="fas fa-times-circle me-1"></i> Invalid IFSC Code`;
+                    msg.className = 'form-text text-danger fw-bold';
+                    ifscInput.classList.add('is-invalid');
                 });
         }
-    </script>
-    <script>
-        document.querySelector('form').addEventListener('submit', function(e) {
 
+        document.querySelector('form').addEventListener('submit', function (e) {
             if (!ifscValid) {
-                e.preventDefault();
-                alert('Please enter a valid IFSC code');
-                document.getElementById('ifsc').focus();
+                // If bank details tab is active or we forced skipped validation earlier (not recommended)
+                // But strictly we should enforce it. 
+                // If the user hasn't touched the bank tab yet, they might not have entered IFSC.
+                // The 'required' attribute handles empty. We handle invalid format here.
+                const ifsc = document.getElementById('ifsc').value;
+                if (ifsc && !ifscValid) {
+                    e.preventDefault();
+                    alert('Please enter a valid IFSC code before submitting.');
+                    switchTab('#bank-tab');
+                    document.getElementById('ifsc').focus();
+                }
             }
         });
     </script>
-
-    <script>
-        function showStep(step) {
-            document.getElementById('personal').classList.remove('active');
-            document.getElementById('bank').classList.remove('active');
-
-            document.getElementById('tabPersonal').classList.remove('active');
-            document.getElementById('tabBank').classList.remove('active');
-
-            document.getElementById(step).classList.add('active');
-
-            if (step === 'personal') {
-                document.getElementById('tabPersonal').classList.add('active');
-            } else {
-                document.getElementById('tabBank').classList.add('active');
-            }
-        }
-    </script>
-
 </body>
 
 </html>

@@ -34,296 +34,144 @@ $members = $conn->query("
 
 <head>
     <title>Edit Chit Group</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap-grid.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
     <link rel="stylesheet" href="../../assets/css/style.css">
-    <style>
-        /* ===============================
-        LAYOUT
-        ================================ */
-        .content {
-            display: flex;
-            gap: 28px;
-            margin-top: 20px;
-        }
-
-        /* ===== FORM CARD ===== */
-        .form-box {
-            background: #ffffff;
-            border-radius: 14px;
-            padding: 28px;
-            border: 1px solid #e5e7eb;
-        }
-
-        /* ===== HEADING ===== */
-        .form-box h3 {
-            font-size: 18px;
-            font-weight: 700;
-            color: #111827;
-            margin-bottom: 24px;
-            padding-bottom: 12px;
-            border-bottom: 2px solid #e5e7eb;
-        }
-
-        /* ===== LABELS ===== */
-        .form-box label {
-            display: block;
-            font-size: 13px;
-            font-weight: 600;
-            color: #374151;
-            margin-bottom: 6px;
-        }
-
-        /* Highlight group name label */
-        .grp_name {
-            color: #4f46e5;
-        }
-
-        /* ===== INPUTS ===== */
-        .form-box input[type="text"],
-        .form-box select {
-            width: 100%;
-            height: 44px;
-            padding: 0 14px;
-            font-size: 14px;
-            border-radius: 10px;
-            border: 1px solid #d1d5db;
-            margin-bottom: 20px;
-            background: #ffffff;
-        }
-
-        /* Focus */
-        .form-box input:focus,
-        .form-box select:focus {
-            border-color: #000000ff;
-            outline: none;
-        }
-
-        /* ===== GROUP NAME SPECIAL ===== */
-        .group-name-input {
-            width: 100%;
-            height: 48px;
-            padding: 0 16px;
-
-            font-size: 15px;
-            font-weight: 500;
-            color: #111827;
-
-            background: #ffffff;
-            border: 1.5px solid #e5e7eb;
-            border-radius: 12px;
-
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        /* Focus state (very clean) */
-        .group-name-input:focus {
-            outline: none;
-            border-color: #111827;
-            box-shadow: 0 0 0 2px rgba(17, 24, 39, 0.08);
-        }
-
-        /* Placeholder (if any) */
-        .group-name-input::placeholder {
-            color: #9ca3af;
-            font-weight: 400;
-        }
-
-
-        /* ===== CHECKBOX ALIGN ===== */
-        .form-box label:last-of-type {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 24px;
-            font-weight: 600;
-        }
-
-        /* ===== BUTTON ===== */
-        .btn-primary {
-            width: 100%;
-            background: #000000ff;
-            color: #ffffff;
-            padding: 12px;
-            border: none;
-            border-radius: 10px;
-            font-size: 15px;
-            font-weight: 700;
-            cursor: pointer;
-        }
-
-        .btn-primary:hover {
-            background: #000000ff;
-        }
-
-
-        /* ===============================
-        SEARCH
-        ================================ */
-        #search {
-            width: 100%;
-            height: 40px;
-            padding: 0 12px;
-            border-radius: 8px;
-            border: 1px solid #d1d5db;
-            font-size: 14px;
-            margin-bottom: 14px;
-        }
-
-        /* ===============================
-   TABLE
-================================ */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 13px;
-        }
-
-        thead {
-            background: #f3f4f6;
-        }
-
-        th {
-            padding: 10px;
-            text-align: left;
-            font-weight: 600;
-            color: #374151;
-            border-bottom: 1px solid #e5e7eb;
-        }
-
-        td {
-            padding: 10px;
-            border-bottom: 1px solid #e5e7eb;
-        }
-
-        tbody tr:hover {
-            background: #f9fafb;
-        }
-
-        /* ===============================
-   BUTTON
-================================ */
-        .btn-primary {
-            background: #000000ff;
-            color: #ffffff;
-            border: none;
-            border-radius: 8px;
-            padding: 10px 18px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .btn-primary:hover {
-            background: #000000ff;
-        }
-
-        /* ===============================
-   RESPONSIVE
-================================ */
-        @media (max-width: 900px) {
-            .content {
-                flex-direction: column;
-            }
-
-            .form-box {
-                width: 100% !important;
-            }
-        }
-    </style>
-
 </head>
 
 <body>
-    <div class="wrapper">
+    <div class="d-flex" id="wrapper">
         <?php include '../layout/sidebar.php'; ?>
 
-        <div class="main">
-            <div class="topbar">
-                <div>
-                    <div class="page-title">Edit Member</div>
-                    <div class="page-subtitle">Update member details</div>
+        <div id="page-content-wrapper">
+            <?php include '../layout/header.php'; ?>
+
+            <div class="container-fluid p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h4 class="mb-0 fw-bold">Edit Group</h4>
+                        <small class="text-secondary">Update group details and assign members</small>
+                    </div>
+                    <a href="index.php" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-arrow-left me-1"></i> Back to List
+                    </a>
                 </div>
-                <?php include '../layout/header.php'; ?>
+
+                <div class="row g-4">
+                    <!-- LEFT : GROUP EDIT -->
+                    <div class="col-12 col-lg-5">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-header bg-white border-bottom-0 pt-4 pb-0">
+                                <h5 class="card-title fw-bold text-primary">
+                                    <i class="fas fa-edit me-2"></i>Edit Details
+                                </h5>
+                            </div>
+                            <div class="card-body p-4">
+                                <form method="post" action="update.php">
+                                    <input type="hidden" name="id" value="<?= $g['id'] ?>">
+
+                                    <div class="form-floating mb-3">
+                                        <input type="text" name="group_name" id="group_name" class="form-control"
+                                            value="<?= htmlspecialchars($g['group_name']) ?>" placeholder="Group Name"
+                                            required>
+                                        <label for="group_name">Group Name</label>
+                                    </div>
+
+                                    <div class="form-floating mb-3">
+                                        <select name="status" id="status" class="form-select">
+                                            <option value="upcoming" <?= $g['status'] == 'upcoming' ? 'selected' : '' ?>>
+                                                Upcoming</option>
+                                            <option value="active" <?= $g['status'] == 'active' ? 'selected' : '' ?>>Active
+                                            </option>
+                                            <option value="completed" <?= $g['status'] == 'completed' ? 'selected' : '' ?>>
+                                                Completed</option>
+                                        </select>
+                                        <label for="status">Group Status</label>
+                                    </div>
+
+                                    <div class="form-check form-switch mb-4">
+                                        <input class="form-check-input" type="checkbox" role="switch" name="is_active"
+                                            id="is_active" <?= $g['is_active'] ? 'checked' : '' ?>>
+                                        <label class="form-check-label" for="is_active">Active Group</label>
+                                    </div>
+
+                                    <button class="btn btn-primary w-100 text-uppercase fw-bold"
+                                        style="letter-spacing: 0.5px;">
+                                        <i class="fas fa-save me-2"></i> Save Changes
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- RIGHT : ADD MEMBERS -->
+                    <div class="col-12 col-lg-7">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div
+                                class="card-header bg-white border-bottom-0 pt-4 pb-0 d-flex justify-content-between align-items-center">
+                                <h5 class="card-title fw-bold text-success mb-0">
+                                    <i class="fas fa-user-plus me-2"></i>Add Members
+                                </h5>
+                            </div>
+                            <div class="card-body p-4">
+
+                                <div class="input-group mb-3">
+                                    <span class="input-group-text bg-light border-end-0"><i
+                                            class="fas fa-search text-muted"></i></span>
+                                    <input type="text" id="search" class="form-control border-start-0 ps-0"
+                                        placeholder="Search available members..." onkeyup="filterMembers()">
+                                </div>
+
+                                <form id="addMembersForm">
+                                    <input type="hidden" name="group_id" value="<?= $groupId ?>">
+
+                                    <div class="table-responsive border rounded"
+                                        style="max-height: 400px; overflow-y: auto;">
+                                        <table class="table table-hover align-middle mb-0" id="memberTable">
+                                            <thead class="table-light sticky-top">
+                                                <tr>
+                                                    <th width="40" class="text-center">
+                                                        <!-- <input type="checkbox" class="form-check-input" id="selectAll"> -->
+                                                    </th>
+                                                    <th>ID</th>
+                                                    <th>Name</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <?php while ($m = $members->fetch_assoc()): ?>
+                                                    <tr>
+                                                        <td class="text-center">
+                                                            <input type="checkbox" class="form-check-input" name="members[]"
+                                                                value="<?= $m['member_id'] ?>">
+                                                        </td>
+                                                        <td><small class="text-muted">#<?= $m['member_id'] ?></small></td>
+                                                        <td class="fw-medium"><?= htmlspecialchars($m['full_name']) ?></td>
+                                                    </tr>
+                                                <?php endwhile; ?>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-success mt-3 w-100 fw-bold">
+                                        <i class="fas fa-plus-circle me-1"></i> Add Selected Members
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
             </div>
-
-            <div class="content" style="display:flex; gap:30px">
-
-                <!-- LEFT : GROUP EDIT -->
-                <div class="form-box" style="width:40%">
-                    <h3>Edit Group: <?= htmlspecialchars($g['group_name']) ?></h3>
-
-                    <form method="post" action="update.php">
-                        <input type="hidden" name="id" value="<?= $g['id'] ?>">
-
-                        <label class="grp_name">Group Name</label>
-                        <input name="group_name" class="group-name-input" value="<?= $g['group_name'] ?>" required>
-
-                        <label>Status</label>
-                        <select name="status">
-                            <option value="upcoming" <?= $g['status'] == 'upcoming' ? 'selected' : '' ?>>Upcoming
-                            </option>
-                            <option value="active" <?= $g['status'] == 'active' ? 'selected' : '' ?>>Active</option>
-                            <option value="completed" <?= $g['status'] == 'completed' ? 'selected' : '' ?>>Completed
-                            </option>
-                        </select>
-
-                        <label>
-                            <input type="checkbox" name="is_active" <?= $g['is_active'] ? 'checked' : '' ?>>
-                            Active
-                        </label>
-
-                        <button class="btn-primary">Save</button>
-                    </form>
-                </div>
-
-                <!-- RIGHT : ADD MEMBERS -->
-                <div class="form-box" style="width:60%">
-                    <h3>Add Members to Group</h3>
-
-                    <!-- SEARCH -->
-                    <input type="text" id="search" placeholder="Search by ID or Name" onkeyup="filterMembers()">
-
-                    <form id="addMembersForm">
-                        <input type="hidden" name="group_id" value="<?= $groupId ?>">
-
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th></th>
-                                    <th>Member ID</th>
-                                    <th>Name</th>
-                                </tr>
-                            </thead>
-                            <tbody id="memberTable">
-                                <?php while ($m = $members->fetch_assoc()): ?>
-                                    <tr>
-                                        <td>
-                                            <input type="checkbox" name="members[]" value="<?= $m['member_id'] ?>">
-                                        </td>
-                                        <td><?= $m['member_id'] ?></td>
-                                        <td><?= htmlspecialchars($m['full_name']) ?></td>
-                                    </tr>
-                                <?php endwhile; ?>
-                            </tbody>
-                        </table>
-
-                        <br>
-                        <button type="submit" class="btn-primary">➕ Add Selected</button>
-                    </form>
-                </div>
-
-            </div>
-
         </div>
     </div>
 
+    <?php include '../layout/scripts.php'; ?>
     <script>
         function filterMembers() {
             let q = document.getElementById('search').value.toLowerCase();
-            document.querySelectorAll('#memberTable tr').forEach(row => {
+            document.querySelectorAll('#memberTable tbody tr').forEach(row => {
                 row.style.display = row.innerText.toLowerCase().includes(q) ? '' : 'none';
             });
         }
@@ -331,14 +179,21 @@ $members = $conn->query("
         document.getElementById('addMembersForm').addEventListener('submit', e => {
             e.preventDefault();
 
+            // Check if any member is selected
+            const checked = document.querySelectorAll('input[name="members[]"]:checked');
+            if (checked.length === 0) {
+                alert('Please select at least one member to add.');
+                return;
+            }
+
             fetch('add-members.php', {
                 method: 'POST',
                 body: new FormData(e.target)
             })
                 .then(r => r.text())
                 .then(res => {
-                    if (res === 'success') {
-                        alert('Members added');
+                    if (res.trim() === 'success') {
+                        alert('Members added successfully');
                         location.reload();
                     } else {
                         alert(res);

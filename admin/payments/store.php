@@ -70,26 +70,28 @@
 // header("Location: index.php?success=1");
 // exit;
 
+session_name('chitfund_admin');
 session_start();
 include '../../config/database.php';
 
-if ($_SESSION['role'] !== 'admin') {
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+    http_response_code(401);
     die("Unauthorized");
 }
 
 /* ---------- INPUT ---------- */
-$memberId   = $_POST['member_id'];
-$groupId    = (int)$_POST['chit_group_id'];
-$actual     = (int)$_POST['actual_amount'];
-$discount   = (int)($_POST['discount_amount'] ?? 0);
+$memberId = $_POST['member_id'];
+$groupId = (int) $_POST['chit_group_id'];
+$actual = (int) $_POST['actual_amount'];
+$discount = (int) ($_POST['discount_amount'] ?? 0);
 // $final      = $actual - $discount;
 // $actual = (int)$_POST['actual_amount'];
-$final  = $actual;
-$mode       = $_POST['payment_mode'];
-$payDate    = $_POST['payment_date'];
+$final = $actual;
+$mode = $_POST['payment_mode'];
+$payDate = $_POST['payment_date'];
 
 /* ---------- RECEIPT ---------- */
-$receiptNo = 'REC-' . date('Y') . '-' . rand(1000,9999);
+$receiptNo = 'REC-' . date('Y') . '-' . rand(1000, 9999);
 
 /* ---------- MONTH (AUTO) ---------- */
 $month = $conn->query("
@@ -128,9 +130,9 @@ $stmt->bind_param(
     $status
 );
 
-if($stmt->execute()){
+if ($stmt->execute()) {
     echo "success";
-}else{
+} else {
     echo "db_error";
 }
 ?>

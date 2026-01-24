@@ -1,15 +1,10 @@
 <?php
 // session_start();
-
 include '../../config/database.php';
 include 'auto-close.php';
 include 'auto-status.php';
 include '../auth.php';
 
-// if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
-//     header("Location: ../../index.php");
-//     exit;
-// }
 
 // $auctions = $conn->query("
 //     SELECT a.*, g.group_name
@@ -32,155 +27,181 @@ $auctions = $conn->query("
 
 <head>
     <title>Upcoming Auctions</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="../../assets/css/style.css">
-    <style>
-        .pagination button {
-            padding: 6px 10px;
-            margin: 0 3px;
-            border: 1px solid #ddd;
-            background: #fff;
-            cursor: pointer;
-            border-radius: 6px;
-        }
-
-        .pagination button.active {
-            background: #2563eb;
-            color: #fff;
-            border-color: #2563eb;
-        }
-    </style>
 </head>
 
 <body>
 
-    <div class="wrapper">
+    <div class="d-flex" id="wrapper">
         <?php include '../layout/sidebar.php'; ?>
 
-        <div class="main">
+        <div id="page-content-wrapper">
+            <?php include '../layout/header.php'; ?>
 
-            <div class="topbar">
-                <div>
-                    <div class="page-title">Upcoming Auctions</div>
-                    <div class="page-subtitle">Scheduled auctions for chit groups</div>
-                </div>
-                <?php include '../layout/header.php'; ?>
-
-            </div>
-
-            <div class="content">
-
-                <a href="create.php"><button class="btn-primary">＋ Create Auction</button></a>
-                <!-- <a href="kulukkal_spin.php"><button class="btn-primary">kulukal</button></a> -->
-
-                <div class="table-box">
-                    <!-- <h3>All Groups (<?= $count ?>)</h3> -->
-                    <div class="table-controls" style="display:flex;gap:10px;align-items:center;margin-bottom:12px;">
-                        <select id="groupFilter" class="form-control">
-                            <option value="">All Groups</option>
-                            <?php
-                            $groups = $conn->query("SELECT DISTINCT group_name FROM chit_groups ORDER BY group_name");
-                            while ($g = $groups->fetch_assoc()):
-                            ?>
-                            <option value="<?= htmlspecialchars($g['group_name']) ?>">
-                                <?= htmlspecialchars($g['group_name']) ?>
-                            </option>
-                            <?php endwhile; ?>
-                        </select>
-
-                        <input type="text" id="searchBox" class="form-control" placeholder="Search..." />
+            <div class="container-fluid p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h4 class="mb-0 fw-bold">Auctions</h4>
+                        <small class="text-secondary">Manage scheduled and live auctions</small>
                     </div>
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Group</th>
-                                <th>Month</th>
-                                <th>Date & Time</th>
-                                <th>End</th>
-                                <th>Starting Bid</th>
-                                <th>Status</th>
-                                <th>Auctions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="auctionTableBody">
-                            <?php while ($a = $auctions->fetch_assoc()): ?>
-                            <tr>
-                                <td><?= htmlspecialchars($a['group_name']) ?></td>
-                                <td><?= $a['auction_month'] ?></td>
-                                <td><?= date('d-m-Y H:i', strtotime($a['auction_datetime'])) ?></td>
-                                <td><?= date('d-m-Y H:i', strtotime($a['auction_end_datetime'])) ?></td>
-                                <td>₹<?= number_format($a['starting_bid_amount']) ?></td>
+                </div>
 
-                                <!-- <td><?= ucfirst($a['status']) ?></td> -->
-                                <td>
-                                    <?= ucfirst($a['status']) ?>
+                <div class="mb-4 d-flex gap-2">
+                    <a href="create.php" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Create Auction
+                    </a>
+                    <!-- <a href="kulukkal_spin.php" class="btn btn-outline-primary">kulukal</a> -->
+                </div>
 
-                                    <?php if ($a['status'] !== 'completed'): ?>
-                                    <button class="btn-danger" onclick="closeAuction(<?= (int) $a['id'] ?>)">
-                                        Close
-                                    </button>
-                                    <?php endif; ?>
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                            <h5 class="card-title mb-0">Auction List</h5>
 
-                                </td>
-                                <td>
-                                    <a href="all_bidding_view.php?auction_id=<?= $a['id'] ?>">
-                                        <button class="btn-primary">Live View</button>
-                                    </a>
-                                    
-                                    <!-- <a href="kulukkal_spin.php?auction_id=<?= $a['id'] ?>">
-                                        <button class="btn-primary">Kulukkal</button>
-                                    </a> -->
-                                    <?php if ($a['auction_type'] === 'Open' && $a['status'] !== 'completed'): ?>
-                                            <a href="kulukkal_spin.php?auction_id=<?= $a['id'] ?>">
-                                                <button class="btn-primary">🎰 Kulukkal</button>
-                                            </a>
-                                        <?php endif; ?>
-                                </td>
-                            </tr>
-                            <?php endwhile; ?>
-                        </tbody>
-                    </table>
-                    <div class="pagination-wrapper"
-                        style="margin-top: 10px;display:flex;align-items:center;justify-content:flex-end;">
-                        <div class="pagination" id="pagination" style="margin-right: 100px;"></div>
-                        <label for=""
-                            style="margin-top: 4px; margin-right: 10px; color: #333; font-weight: bold;">Show
-                            per page </label>
-                        <select id="perPage"
-                            style="margin-left: 10px; padding: 4px 8px; border-radius: 4px; border: 0.5px solid #ccc; font-size: 14px;">
+                            <div class="d-flex gap-2">
+                                <select id="groupFilter" class="form-select w-auto">
+                                    <option value="">All Groups</option>
+                                    <?php
+                                    $groups = $conn->query("SELECT DISTINCT group_name FROM chit_groups ORDER BY group_name");
+                                    while ($g = $groups->fetch_assoc()):
+                                        ?>
+                                        <option value="<?= htmlspecialchars($g['group_name']) ?>">
+                                            <?= htmlspecialchars($g['group_name']) ?>
+                                        </option>
+                                    <?php endwhile; ?>
+                                </select>
+                                <input type="text" id="searchBox" class="form-control" placeholder="Search..." />
+                            </div>
+                        </div>
 
-                            <option value="5">5</option>
-                            <option value="10">10</option>
-                            <option value="25">25</option>
-                        </select>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Group</th>
+                                        <th>Month</th>
+                                        <th>Date & Time</th>
+                                        <th>End</th>
+                                        <th>Starting Bid</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="auctionTableBody">
+                                    <?php while ($a = $auctions->fetch_assoc()): ?>
+                                        <tr>
+                                            <td>
+                                                <span
+                                                    class="fw-medium text-dark"><?= htmlspecialchars($a['group_name']) ?></span>
+                                                <br><small class="text-muted"><?= htmlspecialchars($a['auction_type']) ?>
+                                                    Type</small>
+                                            </td>
+                                            <td><span class="badge bg-light text-dark border">Month
+                                                    <?= $a['auction_month'] ?></span></td>
+                                            <td>
+                                                <div class="d-flex flex-column" style="font-size: 0.9em;">
+                                                    <span><?= date('d M Y', strtotime($a['auction_datetime'])) ?></span>
+                                                    <small
+                                                        class="text-muted"><?= date('h:i A', strtotime($a['auction_datetime'])) ?></small>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex flex-column" style="font-size: 0.9em;">
+                                                    <span><?= date('d M Y', strtotime($a['auction_end_datetime'])) ?></span>
+                                                    <small
+                                                        class="text-muted"><?= date('h:i A', strtotime($a['auction_end_datetime'])) ?></small>
+                                                </div>
+                                            </td>
+                                            <td><span
+                                                    class="fw-bold text-success">₹<?= number_format($a['starting_bid_amount']) ?></span>
+                                            </td>
+
+                                            <td>
+                                                <?php
+                                                $statusClass = match (strtolower($a['status'])) {
+                                                    'active' => 'bg-success',
+                                                    'upcoming' => 'bg-warning text-dark',
+                                                    'completed' => 'bg-secondary',
+                                                    default => 'bg-light text-dark'
+                                                };
+                                                ?>
+                                                <span class="badge <?= $statusClass ?>">
+                                                    <?= ucfirst($a['status']) ?>
+                                                </span>
+
+                                                <?php if ($a['status'] !== 'completed'): ?>
+                                                    <div class="mt-1">
+                                                        <a href="javascript:void(0)"
+                                                            onclick="closeAuction(<?= (int) $a['id'] ?>)"
+                                                            class="text-danger small text-decoration-none">
+                                                            <i class="fas fa-times-circle"></i> Close
+                                                        </a>
+                                                    </div>
+                                                <?php endif; ?>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex flex-wrap gap-2">
+                                                    <a href="all_bidding_view.php?auction_id=<?= $a['id'] ?>"
+                                                        class="btn btn-sm btn-outline-primary">
+                                                        <i class="fas fa-eye"></i> View
+                                                    </a>
+
+                                                    <?php if ($a['auction_type'] === 'Open' && $a['status'] !== 'completed'): ?>
+                                                        <a href="kulukkal_spin.php?auction_id=<?= $a['id'] ?>"
+                                                            class="btn btn-sm btn-primary">
+                                                            <i class="fas fa-dice"></i> Kulukkal
+                                                        </a>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    <?php endwhile; ?>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <div class="d-flex align-items-center gap-2">
+                                <small>Show per page:</small>
+                                <select id="perPage" class="form-select form-select-sm w-auto">
+                                    <option value="5">5</option>
+                                    <option value="10">10</option>
+                                    <option value="25">25</option>
+                                </select>
+                            </div>
+                            <div id="pagination" class="btn-group"></div>
+                        </div>
+
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- script -->
+    <?php include '../layout/scripts.php'; ?>
     <script>
         function closeAuction(id) {
             if (!confirm('Mark this auction as completed?')) return;
 
             fetch('close.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded'
-                    },
-                    body: new URLSearchParams({
-                        auction_id: id
-                    })
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams({
+                    auction_id: id
                 })
+            })
                 .then(r => r.text())
                 .then(res => {
                     if (res === 'success') location.reload();
                     else alert(res);
                 });
         }
-    </script>
-    <script>
+
         document.addEventListener('DOMContentLoaded', () => {
 
             const tbody = document.getElementById('auctionTableBody');
@@ -202,7 +223,9 @@ $auctions = $conn->query("
 
                 return rows.filter(row => {
                     const text = row.innerText.toLowerCase();
-                    const groupName = row.children[0].innerText.toLowerCase(); // Group column
+                    const groupNameCol = row.querySelector('td:nth-child(1) span');
+                    const groupName = groupNameCol ? groupNameCol.innerText.toLowerCase() : '';
+
                     return text.includes(search) && (!group || groupName.includes(group));
                 });
             }
@@ -228,6 +251,7 @@ $auctions = $conn->query("
                 const createBtn = (label, page, active = false, disabled = false) => {
                     const btn = document.createElement('button');
                     btn.textContent = label;
+                    btn.className = 'btn btn-outline-secondary btn-sm'; // Bootstrap button
 
                     if (active) btn.classList.add('active');
                     if (disabled) btn.disabled = true;
@@ -243,7 +267,7 @@ $auctions = $conn->query("
 
                 /* PREV */
                 if (currentPage > 1) {
-                    pagination.appendChild(createBtn('‹ Prev', currentPage - 1));
+                    pagination.appendChild(createBtn('‹', currentPage - 1));
                 }
 
                 const range = 1; // pages around current
@@ -255,7 +279,7 @@ $auctions = $conn->query("
 
                 /* LEFT ELLIPSIS */
                 if (start > 2) {
-                    pagination.appendChild(createBtn('…', 0, false, true));
+                    pagination.appendChild(createBtn('...', 0, false, true));
                 }
 
                 /* MIDDLE PAGES */
@@ -265,7 +289,7 @@ $auctions = $conn->query("
 
                 /* RIGHT ELLIPSIS */
                 if (end < totalPages - 1) {
-                    pagination.appendChild(createBtn('…', 0, false, true));
+                    pagination.appendChild(createBtn('...', 0, false, true));
                 }
 
                 /* LAST PAGE */
@@ -277,10 +301,9 @@ $auctions = $conn->query("
 
                 /* NEXT */
                 if (currentPage < totalPages) {
-                    pagination.appendChild(createBtn('Next ›', currentPage + 1));
+                    pagination.appendChild(createBtn('›', currentPage + 1));
                 }
             }
-
 
 
             /* EVENTS */

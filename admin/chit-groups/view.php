@@ -19,7 +19,6 @@ if (!$g) {
     die('Group not found');
 }
 
-/* 🔹 Fetch assigned members */
 /* Fetch assigned members */
 $membersStmt = $conn->prepare("
     SELECT 
@@ -39,25 +38,8 @@ $members = $membersStmt->get_result();
 $assignedCount = $members->num_rows;
 $maxMembers = (int) $g['total_members'];
 
-$id = (int) $_GET['id'];
-
-$stmt = $conn->prepare('SELECT * FROM chit_groups WHERE id=?');
-$stmt->bind_param('i', $id);
-$stmt->execute();
-$group = $stmt->get_result()->fetch_assoc();
-
-if (!$group) {
-    die('Group not found');
-}
-$assigned = $conn->query("
-    SELECT m.member_id, m.full_name
-    FROM chit_group_members cgm
-    JOIN members m ON cgm.member_id = m.member_id
-    WHERE cgm.group_id = $id
-");
-
-$completed = $group['completed_months'];
-$total = $group['duration_months'];
+$completed = $g['completed_months'];
+$total = $g['duration_months'];
 $remaining = $total - $completed;
 $progress = $total > 0 ? round(($completed / $total) * 100) : 0;
 ?>
@@ -68,336 +50,171 @@ $progress = $total > 0 ? round(($completed / $total) * 100) : 0;
 
 <head>
     <title>Chit Group Details</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="../../assets/css/style.css">
-    <style>
-        /* ===============================
-        PAGE STRUCTURE
-        ================================ */
-        .wrapper {
-            display: flex;
-            min-height: 100vh;
-            background: #f8fafc;
-        }
-
-        .main {
-            flex: 1;
-            padding: 24px 28px;
-        }
-
-        /* ===============================
-        TOPBAR
-        ================================ */
-        .topbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-        }
-
-        .page-title {
-            font-size: 22px;
-            font-weight: 700;
-            color: #111827;
-        }
-
-        .page-subtitle {
-            font-size: 13px;
-            color: #6b7280;
-            margin-top: 4px;
-        }
-
-        /* ===============================
-        CONTENT
-        ================================ */
-        .content {
-            max-width: 1100px;
-        }
-
-        /* ===============================
-        GROUP DETAILS CARD
-        ================================ */
-        .form-box {
-            background: #ffffff;
-            border-radius: 14px;
-            padding: 26px 28px;
-            border: 1px solid #e5e7eb;
-        }
-
-        .form-box h3 {
-            font-size: 20px;
-            font-weight: 700;
-            color: #111827;
-            margin-bottom: 20px;
-        }
-
-        /* Group info rows */
-        .form-box p {
-            font-size: 14px;
-            color: #374151;
-            margin-bottom: 10px;
-            display: flex;
-            gap: 8px;
-        }
-
-        .form-box p b {
-            color: #111827;
-            min-width: 170px;
-        }
-
-        /* ===============================
-        STATUS BADGES
-        ================================ */
-        .badge {
-            padding: 4px 10px;
-            border-radius: 999px;
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: capitalize;
-        }
-
-        /* Badge colors */
-        .badge.upcoming {
-            background: #eef2ff;
-            color: #4338ca;
-        }
-
-        .badge.active {
-            background: #ecfdf5;
-            color: #047857;
-        }
-
-        .badge.completed {
-            background: #f3f4f6;
-            color: #374151;
-        }
-
-        /* ===============================
-        MEMBERS TABLE CARD
-        ================================ */
-        .table-box {
-            margin-top: 28px;
-            background: #ffffff;
-            border-radius: 14px;
-            padding: 24px;
-            border: 1px solid #e5e7eb;
-        }
-
-        .table-box h3 {
-            font-size: 17px;
-            font-weight: 600;
-            color: #111827;
-            margin-bottom: 14px;
-        }
-
-        /* ===============================
-        TABLE
-        ================================ */
-        .table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 13.5px;
-        }
-
-        .table thead {
-            background: #f9fafb;
-        }
-
-        .table th {
-            text-align: left;
-            font-weight: 600;
-            color: #374151;
-            padding: 12px 10px;
-            border-bottom: 1px solid #e5e7eb;
-        }
-
-        .table td {
-            padding: 12px 10px;
-            border-bottom: 1px solid #e5e7eb;
-            color: #111827;
-        }
-
-        .table tbody tr:hover {
-            background: #f8fafc;
-        }
-
-        /* ===============================
-        BACK BUTTON
-        ================================ */
-        .btn-secondary {
-            display: inline-block;
-            margin-top: 20px;
-            font-size: 14px;
-            font-weight: 600;
-            color: #4338ca;
-            text-decoration: none;
-        }
-
-        .btn-secondary:hover {
-            text-decoration: underline;
-        }
-
-        /* ===============================
-        RESPONSIVE
-        ================================ */
-        @media (max-width: 900px) {
-            .main {
-                padding: 18px;
-            }
-
-            .form-box p {
-                flex-direction: column;
-                gap: 2px;
-            }
-
-            .form-box p b {
-                min-width: auto;
-            }
-        }
-    </style>
 </head>
 
 <body>
 
-    <div class="wrapper">
+    <div class="d-flex" id="wrapper">
 
         <?php include '../layout/sidebar.php'; ?>
 
-        <div class="main">
+        <div id="page-content-wrapper">
+             <?php include '../layout/header.php'; ?>
 
-            <div class="topbar">
-                <div>
-                    <div class="page-title"><?= $group['group_name'] ?></div>
-                    <div class="page-subtitle">Chit group details and information</div>
-                </div>
-                <?php include '../layout/header.php'; ?>
-            </div>
-            <a href="../auctions/index.php?group_id=<?= $group['id'] ?>" class="btn btn-primary mb-3">
-                <i class="fa fa-gavel me-1"></i> View Auctions
-            </a>
-
-
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
-                <!-- GROUP INFO -->
-                <div class="info-box">
-                    <h4>Group Information</h4><br>
-
-                    <div class="info-row">
-                        <span>Status</span>
-                        <span class="status"><?= ucfirst($group['status']) ?></span>
+            <div class="container-fluid p-4">
+                
+                <!-- Header -->
+                <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+                    <div>
+                        <h4 class="mb-0 fw-bold"><?= htmlspecialchars($g['group_name']) ?></h4>
+                        <small class="text-secondary">Group Code: <span class="fw-medium text-dark"><?= $g['group_code'] ?></span></small>
                     </div>
-
-                    <div class="info-row">
-                        <span>Total Members</span>
-                        <span><?= $group['total_members'] ?></span>
-                    </div>
-
-                    <div class="info-row">
-                        <span>Pool Amount</span>
-                        <span>₹<?= number_format($group['total_value']) ?></span>
-                    </div>
-
-                    <div class="info-row">
-                        <span>Duration</span>
-                        <span><?= $group['duration_months'] ?> months</span>
-                    </div>
-
-                    <div class="info-row">
-                        <span>Start Date</span>
-                        <span><?= date('d-m-Y', strtotime($group['start_date'])) ?></span>
+                    <div class="d-flex gap-2">
+                        <a href="index.php" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left"></i> Back
+                        </a>
+                        <a href="../auctions/index.php?group_id=<?= $g['id'] ?>" class="btn btn-primary">
+                            <i class="fa fa-gavel me-1"></i> View Auctions
+                        </a>
                     </div>
                 </div>
 
-                <!-- PROGRESS -->
-                <div class="info-box">
-                    <h4>Progress</h4><br>
+                <div class="row g-4">
+                    
+                    <!-- Stats / Info -->
+                    <div class="col-12 col-xl-4">
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <div class="card border-0 shadow-sm">
+                                    <div class="card-body">
+                                        <h6 class="text-uppercase text-muted fw-bold mb-3" style="font-size: 0.75rem;">Status & Progress</h6>
+                                        
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span class="fw-medium">Completion status</span>
+                                            <span class="badge <?= $g['status'] == 'active' ? 'bg-success' : ($g['status'] == 'completed' ? 'bg-secondary' : 'bg-warning text-dark') ?>">
+                                                <?= ucfirst($g['status']) ?>
+                                            </span>
+                                        </div>
 
-                    <div style="display:flex;justify-content:space-between;">
-                        <span>Current Month</span>
-                        <span><?= $completed ?> / <?= $total ?></span>
-                    </div>
+                                        <div class="mt-3">
+                                            <div class="d-flex justify-content-between small mb-1">
+                                                <span>Progress (<?= $completed ?>/<?= $total ?> months)</span>
+                                                <span class="fw-bold"><?= $progress ?>%</span>
+                                            </div>
+                                            <div class="progress" style="height: 8px;">
+                                                <div class="progress-bar bg-primary" role="progressbar" style="width: <?= $progress ?>%"></div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="row mt-4 text-center">
+                                            <div class="col-6 border-end">
+                                                <h4 class="mb-0 fw-bold text-success"><?= $completed ?></h4>
+                                                <small class="text-muted">Completed</small>
+                                            </div>
+                                            <div class="col-6">
+                                                <h4 class="mb-0 fw-bold text-secondary"><?= $remaining ?></h4>
+                                                <small class="text-muted">Remaining</small>
+                                            </div>
+                                        </div>
 
-                    <div class="progress-bar">
-                        <div class="progress" style="width:<?= $progress ?>%"></div>
-                    </div>
+                                    </div>
+                                </div>
+                            </div>
 
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:20px;">
-                        <div class="stat-box green">
-                            <h2><?= $completed ?></h2>
-                            <small>Completed</small>
+                            <div class="col-12">
+                                <div class="card border-0 shadow-sm">
+                                    <div class="card-body">
+                                        <h6 class="text-uppercase text-muted fw-bold mb-3" style="font-size: 0.75rem;">Group Details</h6>
+                                        
+                                        <ul class="list-group list-group-flush">
+                                            <li class="list-group-item d-flex justify-content-between px-0">
+                                                <span class="text-secondary">Auction Type</span>
+                                                <span class="fw-medium"><?= $g['auction_type'] ?></span>
+                                            </li>
+                                            <li class="list-group-item d-flex justify-content-between px-0">
+                                                <span class="text-secondary">Pool Amount</span>
+                                                <span class="fw-bold text-dark">₹<?= number_format($g['total_value']) ?></span>
+                                            </li>
+                                            <li class="list-group-item d-flex justify-content-between px-0">
+                                                <span class="text-secondary">Members</span>
+                                                <span class="fw-medium"><?= $assignedCount ?> / <?= $maxMembers ?></span>
+                                            </li>
+                                            <li class="list-group-item d-flex justify-content-between px-0">
+                                                <span class="text-secondary">Start Date</span>
+                                                <span class="fw-medium"><?= date('d M Y', strtotime($g['start_date'])) ?></span>
+                                            </li>
+                                        </ul>
+
+                                    </div>
+                                </div>
+                            </div>
                         </div>
+                    </div>
 
-                        <div class="stat-box blue">
-                            <h2><?= $remaining ?></h2>
-                            <small>Remaining</small>
+                    <!-- Members List -->
+                    <div class="col-12 col-xl-8">
+                        <div class="card border-0 shadow-sm h-100">
+                             <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                                <h6 class="mb-0 fw-bold text-primary"><i class="fas fa-users me-2"></i>Assigned Members (<?= $assignedCount ?>)</h6>
+                                <input type="text" id="memberSearch" class="form-control form-control-sm w-auto" placeholder="Search member...">
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <?php if ($assignedCount === 0): ?>
+                                        <div class="p-5 text-center text-muted">
+                                            <i class="fas fa-user-friends fa-3x mb-3 text-light"></i>
+                                            <p>No members assigned to this group yet.</p>
+                                        </div>
+                                    <?php else: ?>
+                                        <table class="table table-hover align-middle mb-0" id="membersTable">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th class="ps-4">#</th>
+                                                    <th>Member ID</th>
+                                                    <th>Name</th>
+                                                    <th>Mobile</th>
+                                                    <th>Joined On</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <?php $i=1; while($m = $members->fetch_assoc()): ?>
+                                                <tr>
+                                                    <td class="ps-4 text-muted"><?= $i++ ?></td>
+                                                    <td><span class="badge bg-light text-dark border"><?= htmlspecialchars($m['member_id']) ?></span></td>
+                                                    <td class="fw-medium"><?= htmlspecialchars($m['full_name']) ?></td>
+                                                    <td class="text-secondary"><?= htmlspecialchars($m['mobile']) ?></td>
+                                                    <td class="text-secondary small"><?= date('d M Y', strtotime($m['joined_at'])) ?></td>
+                                                </tr>
+                                                <?php endwhile; ?>
+                                            </tbody>
+                                        </table>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <!-- 🔹 GROUP DETAILS -->
-                <div class="form-box">
-                    <h3><?= htmlspecialchars($g['group_name']) ?></h3>
 
-                    <p><b>Group Code:</b> <?= $g['group_code'] ?></p>
-                    <p><b>Auction Type:</b> <?= $g['auction_type'] ?></p>
-                    <p><b>Duration:</b> <?= $g['duration_months'] ?> months</p>
-                    <p><b>Status:</b>
-                        <span class="badge <?= $g['status'] ?>">
-                            <?= ucfirst($g['status']) ?>
-                        </span>
-                    </p>
-
-                    <p><b>Members:</b> <?= $assignedCount ?> / <?= $maxMembers ?></p>
-                </div>
-
-                <!-- 🔹 MEMBERS LIST -->
-
-                <div  class="form-box">
-                    <h3>
-                        Assigned Members (<?= $assignedCount ?> / <?= $maxMembers ?>)
-                    </h3>
-
-                    <?php if ($assignedCount === 0): ?>
-                    <p style="color:#888;">No members assigned to this group.</p>
-                    <?php else: ?>
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Member ID</th>
-                                <th>Name</th>
-                                <th>Mobile</th>
-                                <th>Joined On</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php $i=1; while($m = $members->fetch_assoc()): ?>
-                            <tr>
-                                <td><?= $i++ ?></td>
-                                <td><?= htmlspecialchars($m['member_id']) ?></td>
-                                <td><?= htmlspecialchars($m['full_name']) ?></td>
-                                <td><?= htmlspecialchars($m['mobile']) ?></td>
-                                <td><?= date('d M Y', strtotime($m['joined_at'])) ?></td>
-                            </tr>
-                            <?php endwhile; ?>
-                        </tbody>
-                    </table>
-                    <?php endif; ?>
                 </div>
             </div>
-            <a href="index.php" class="btn-secondary">← Back</a>
         </div>
     </div>
-    </div>
-</body>
-<script>
-    document.getElementById('search').addEventListener('keyup', function() {
-        const value = this.value.toLowerCase();
-        document.querySelectorAll('#memberTable tbody tr').forEach(row => {
-            row.style.display = row.innerText.toLowerCase().includes(value) ?
-                '' :
-                'none';
-        });
-    });
-</script>
+    
+    <?php include '../layout/scripts.php'; ?>
+    <script>
+        const searchInput = document.getElementById('memberSearch');
+        if(searchInput) {
+            searchInput.addEventListener('keyup', function() {
+                const value = this.value.toLowerCase();
+                document.querySelectorAll('#membersTable tbody tr').forEach(row => {
+                    row.style.display = row.innerText.toLowerCase().includes(value) ? '' : 'none';
+                });
+            });
+        }
+    </script>
 
+</body>
 </html>

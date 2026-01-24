@@ -104,102 +104,179 @@ $pageTitle = 'Dashboard';
 <html>
 
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
     <link rel="stylesheet" href="../assets/css/style.css">
+    <style>
+        #wrapper {
+            overflow-x: hidden;
+        }
+
+        #sidebar-wrapper {
+            min-height: 100vh;
+            margin-left: -15rem;
+            transition: margin 0.25s ease-out;
+        }
+
+        #sidebar-wrapper .sidebar-heading {
+            padding: 0.875rem 1.25rem;
+            font-size: 1.2rem;
+        }
+
+        #sidebar-wrapper .list-group {
+            width: 15rem;
+        }
+
+        #page-content-wrapper {
+            width: 100%;
+        }
+
+        body.sb-sidenav-toggled #sidebar-wrapper {
+            margin-left: 0;
+        }
+
+        @media (min-width: 768px) {
+            #sidebar-wrapper {
+                margin-left: 0;
+            }
+
+            #page-content-wrapper {
+                min-width: 0;
+                width: 100%;
+            }
+
+            body.sb-sidenav-toggled #sidebar-wrapper {
+                margin-left: -15rem;
+            }
+        }
+    </style>
 </head>
 
 <body>
-    <div class="wrapper">
+    <div class="d-flex" id="wrapper">
 
         <?php include 'layout/sidebar.php'; ?>
 
-        <div class="main">
-            <div class="topbar">
-                <div>
-                    <div class="page-title">Dashboard</div>
-                </div>
+        <div id="page-content-wrapper">
 
-                <?php include './layout/header.php'; ?>
-            </div>
+            <?php include './layout/header.php'; ?>
 
+            <div class="container-fluid p-4">
+                <p class="text-secondary mb-4">Welcome back! Here's your overview.</p>
 
-
-            <div class="content">
-                <p style="color:#6b7280;">Welcome back! Here's your overview.</p>
-
-                <div class="cards">
-                    <div class="card">
-                        <i class="fa-solid fa-layer-group fa-bounce"></i>
-                        <h4>Active Groups</h4>
-                        <h2><?= $activeGroups ?></h2>
+                <div class="row g-4 mb-4">
+                    <div class="col-12 col-md-6 col-xl-3">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body p-4">
+                                <i class="fa-solid fa-layer-group fa-bounce text-primary mb-3 fs-3"></i>
+                                <h6 class="card-subtitle mb-2 text-muted">Active Groups</h6>
+                                <h2 class="card-title mb-0"><?= $activeGroups ?></h2>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="card">
-                        <i class="fa-solid fa-users fa-beat"></i>
-                        <h4>Total Members</h4>
-                        <h2><?= $totalMembers ?></h2>
+                    <div class="col-12 col-md-6 col-xl-3">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body p-4">
+                                <i class="fa-solid fa-users fa-beat text-success mb-3 fs-3"></i>
+                                <h6 class="card-subtitle mb-2 text-muted">Total Members</h6>
+                                <h2 class="card-title mb-0"><?= $totalMembers ?></h2>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="card">
-                        <i class="fa-solid fa-gavel fa-spin-pulse"></i>
-                        <h4>Live Auctions</h4>
-                        <h2><?= $liveAuctions ?></h2>
-                        <small><?= $upcomingAuctions ?> upcoming</small>
+                    <div class="col-12 col-md-6 col-xl-3">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body p-4">
+                                <i class="fa-solid fa-gavel fa-spin-pulse text-warning mb-3 fs-3"></i>
+                                <h6 class="card-subtitle mb-2 text-muted">Live Auctions</h6>
+                                <h2 class="card-title mb-0"><?= $liveAuctions ?></h2>
+                                <small class="text-secondary"><?= $upcomingAuctions ?> upcoming</small>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="card">
-                        <i class="fa-solid fa-indian-rupee-sign fa-fade"></i>
-                        <h4>Total Collections</h4>
-                        <h2>₹<?= number_format($totalCollections) ?></h2>
-                    </div>
-                </div>
-
-
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
-                    <div class="box">
-                        <h4>Recent Auctions</h4><br>
-
-                        <?php if ($recentAuctions->num_rows === 0): ?>
-                            <small>No completed auctions</small>
-                        <?php endif; ?>
-
-                        <?php while ($a = $recentAuctions->fetch_assoc()): ?>
-                            <b><?= htmlspecialchars($a['group_name']) ?> – Month <?= $a['auction_month'] ?></b><br>
-                            <small>
-                                Winner: <?= htmlspecialchars($a['full_name'] ?? '—') ?>
-                                ₹<?= number_format($a['winning_bid_amount'] ?? 0) ?>
-                            </small>
-                            <hr style="margin:10px 0;">
-                        <?php endwhile; ?>
-                    </div>
-
-
-                    <div class="box">
-                        <h4>Recent Payments</h4><br>
-
-                        <?php if ($recentPayments->num_rows === 0): ?>
-                            <small>No payments yet</small>
-                        <?php endif; ?>
-
-                        <?php while ($p = $recentPayments->fetch_assoc()): ?>
-                            <b><?= htmlspecialchars($p['full_name']) ?></b> – ₹<?= number_format($p['final_amount']) ?><br>
-                            <small><?= date('d M Y', strtotime($p['payment_date'])) ?></small>
-                            <hr style="margin:10px 0;">
-                        <?php endwhile; ?>
+                    <div class="col-12 col-md-6 col-xl-3">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body p-4">
+                                <i class="fa-solid fa-indian-rupee-sign fa-fade text-info mb-3 fs-3"></i>
+                                <h6 class="card-subtitle mb-2 text-muted">Total Collections</h6>
+                                <h2 class="card-title mb-0">₹<?= number_format($totalCollections) ?></h2>
+                            </div>
+                        </div>
                     </div>
                 </div>
+
+
+                <div class="row g-4">
+                    <div class="col-12 col-lg-6">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body p-4">
+                                <h4 class="card-title mb-4">Recent Auctions</h4>
+
+                                <?php if ($recentAuctions->num_rows === 0): ?>
+                                    <small class="text-muted">No completed auctions</small>
+                                <?php endif; ?>
+
+                                <?php while ($a = $recentAuctions->fetch_assoc()): ?>
+                                    <div class="mb-3 border-bottom pb-2 last-no-border">
+                                        <div class="d-flex justify-content-between">
+                                            <b><?= htmlspecialchars($a['group_name']) ?> – Month
+                                                <?= $a['auction_month'] ?></b>
+                                            <span
+                                                class="text-end fw-bold">₹<?= number_format($a['winning_bid_amount'] ?? 0) ?></span>
+                                        </div>
+                                        <small class="text-secondary">
+                                            Winner: <?= htmlspecialchars($a['full_name'] ?? '—') ?>
+                                        </small>
+                                    </div>
+                                <?php endwhile; ?>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="col-12 col-lg-6">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body p-4">
+                                <h4 class="card-title mb-4">Recent Payments</h4>
+
+                                <?php if ($recentPayments->num_rows === 0): ?>
+                                    <small class="text-muted">No payments yet</small>
+                                <?php endif; ?>
+
+                                <?php while ($p = $recentPayments->fetch_assoc()): ?>
+                                    <div class="mb-3 border-bottom pb-2 last-no-border">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <b><?= htmlspecialchars($p['full_name']) ?></b>
+                                            <span class="fw-bold">₹<?= number_format($p['final_amount']) ?></span>
+                                        </div>
+                                        <small
+                                            class="text-secondary"><?= date('d M Y', strtotime($p['payment_date'])) ?></small>
+                                    </div>
+                                <?php endwhile; ?>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <?php if ($pendingPayments > 0): ?>
-                    <div class="alert">
-                        <i class="fa-solid fa-triangle-exclamation fa-shake"></i>
-                        💰 <b>You have <?= $pendingPayments ?> pending payment(s)</b><br>
-                        Please follow up with members
+                    <div class="alert alert-warning mt-4 d-flex align-items-center gap-3 shadow-sm" role="alert">
+                        <i class="fa-solid fa-triangle-exclamation fa-shake fs-4"></i>
+                        <div>
+                            <b>You have <?= $pendingPayments ?> pending payment(s)</b><br>
+                            Please follow up with members
+                        </div>
                     </div>
                 <?php endif; ?>
             </div>
         </div>
     </div>
+
+    <?php include 'layout/scripts.php'; ?>
 </body>
 
 </html>

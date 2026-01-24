@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Chit Fund Portal</title>
+    <title>Member Login - Chit Fund Portal</title>
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
@@ -32,8 +32,8 @@
         }
 
         .login-header {
-            background: #111827;
-            /* Gray 900 */
+            background: #4f46e5;
+            /* Member Brand Color */
             padding: 30px;
             text-align: center;
             color: white;
@@ -42,8 +42,7 @@
         .login-header i {
             font-size: 3rem;
             margin-bottom: 10px;
-            color: #4f46e5;
-            /* Indigo 600 */
+            color: rgba(255, 255, 255, 0.9);
         }
 
         .login-body {
@@ -77,23 +76,6 @@
             transform: translateY(-1px);
         }
 
-        .role-switch .btn-check:checked+.btn-outline-primary {
-            background-color: #4f46e5;
-            color: white;
-            border-color: #4f46e5;
-        }
-
-        .role-switch .btn-outline-primary {
-            color: #4b5563;
-            border-color: #e5e7eb;
-            font-weight: 500;
-        }
-
-        .role-switch .btn-outline-primary:hover {
-            background-color: #f9fafb;
-            color: #111827;
-        }
-
         .input-group-text {
             background-color: transparent;
             border-left: none;
@@ -112,34 +94,27 @@
 
     <div class="login-card">
         <div class="login-header">
-            <i class="fa-solid fa-coins fa-bounce"></i>
-            <h3 class="fw-bold mb-1">Chit Fund Portal</h3>
-            <p class="text-white-50 mb-0 small">Secure Access Dashboard</p>
+            <i class="fa-solid fa-user-circle"></i>
+            <h3 class="fw-bold mb-1">Member Login</h3>
+            <p class="text-white-50 mb-0 small">Access your chit groups and auctions</p>
         </div>
 
         <div class="login-body">
-            <div class="role-switch btn-group w-100 mb-4" role="group">
-                <input type="radio" class="btn-check" name="role_selector" id="adminRole" value="admin" checked>
-                <label class="btn btn-outline-primary py-2" for="adminRole">Admin</label>
-
-                <input type="radio" class="btn-check" name="role_selector" id="memberRole" value="member">
-                <label class="btn btn-outline-primary py-2" for="memberRole">Member</label>
-            </div>
 
             <form id="loginForm">
-                <input type="hidden" name="role" id="role" value="admin">
+                <input type="hidden" name="role" id="role" value="member">
 
                 <div class="form-floating mb-3">
                     <input type="text" class="form-control" name="login_id" id="login_id" placeholder="Login ID"
                         required>
-                    <label for="login_id">Login ID / Mobile</label>
+                    <label for="login_id">Member ID / Mobile</label>
                 </div>
 
                 <div class="input-group mb-4">
                     <div class="form-floating flex-grow-1">
                         <input type="password" class="form-control password-input" name="password" id="password"
                             placeholder="Password" required>
-                        <label for="password">Password</label>
+                        <label for="password">Password (UTR ID)</label>
                     </div>
                     <span class="input-group-text border-start-0" id="togglePassword">
                         <i class="far fa-eye text-muted"></i>
@@ -152,24 +127,14 @@
             </form>
 
             <div class="text-center mt-4">
-                <small class="text-muted">Need help? Contact support</small>
+                <a href="../index.php" class="small text-decoration-none text-muted">
+                    <i class="fas fa-arrow-left me-1"></i> Back to Main Login
+                </a>
             </div>
         </div>
     </div>
 
     <script>
-        // Role Switch Logic
-        const roleInputs = document.querySelectorAll('input[name="role_selector"]');
-        const roleHidden = document.getElementById('role');
-        const loginBtn = document.getElementById('loginBtn');
-
-        roleInputs.forEach(input => {
-            input.addEventListener('change', (e) => {
-                roleHidden.value = e.target.value;
-                loginBtn.textContent = e.target.value === 'admin' ? 'Login as Admin' : 'Login as Member';
-            });
-        });
-
         // Password Toggle
         const togglePassword = document.querySelector('#togglePassword');
         const password = document.querySelector('#password');
@@ -187,7 +152,7 @@
 
             const loginId = document.getElementById('login_id').value;
             const password = document.getElementById('password').value;
-            const role = document.getElementById('role').value;
+            const role = document.getElementById('role').value; // 'member'
             const btn = document.getElementById('loginBtn');
 
             // Loading state
@@ -195,7 +160,7 @@
             btn.textContent = 'Verifying...';
             btn.disabled = true;
 
-            fetch('auth/login.php', {
+            fetch('../auth/login.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: `login_id=${encodeURIComponent(loginId)}&password=${encodeURIComponent(password)}&role=${role}`
@@ -203,11 +168,7 @@
                 .then(res => res.text())
                 .then(result => {
                     if (result.trim() === 'success') {
-                        if (role === 'admin') {
-                            window.location.href = 'admin/dashboard.php';
-                        } else {
-                            window.location.href = 'member/dashboard.php';
-                        }
+                        window.location.href = 'dashboard.php';
                     } else if (result.trim() === 'wrong_password') {
                         alert('Incorrect password');
                     } else if (result.trim() === 'not_found') {
